@@ -73,7 +73,7 @@ namespace WellsChat.Clientconsole
             {
                 Console.SetCursorPosition(0, Console.CursorTop);
                 Console.BackgroundColor = ConsoleColor.DarkCyan;
-                Console.WriteLine($"{DateTime.Now.ToString("g")} {user.Email} ({user.DisplayName}) [{user.ActiveConnections}] connected.");
+                Console.WriteLine($"{DateTime.Now.ToString("g")} | {user.Email} ({user.DisplayName}) [{user.ActiveConnections}] connected.");
                 Console.ResetColor();
                 Console.Write("> ");
             });
@@ -82,7 +82,7 @@ namespace WellsChat.Clientconsole
             {
                 Console.SetCursorPosition(0, Console.CursorTop);
                 Console.BackgroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine($"{DateTime.Now.ToString("g")} {user.Email} ({user.DisplayName}) [{user.ActiveConnections}] disconnected.");
+                Console.WriteLine($"{DateTime.Now.ToString("g")} | {user.Email} ({user.DisplayName}) [{user.ActiveConnections}] disconnected.");
                 Console.ResetColor();
                 Console.Write("> ");
             });
@@ -91,7 +91,7 @@ namespace WellsChat.Clientconsole
             {
                 //TODO: decrypt message
 
-                var receivedMsg = $"{time.ToString("g")} {user}: {message}";
+                var receivedMsg = $"{time.ToString("g")} | {user}: {message}";
                 Console.SetCursorPosition(0, Console.CursorTop);
                 Console.BackgroundColor = ConsoleColor.DarkBlue;
                 Console.WriteLine(receivedMsg);
@@ -101,7 +101,7 @@ namespace WellsChat.Clientconsole
 
             hubConnection.On<DateTime, string, string>("SendSuccess", (time, user, message) =>
             {
-                var receivedMsg = $"{time.ToString("g")} {user}: {message}";
+                var receivedMsg = $"{time.ToString("g")} | {user}: {message}";
                 Console.SetCursorPosition(0, Console.CursorTop - 1);
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
                 Console.WriteLine(receivedMsg);
