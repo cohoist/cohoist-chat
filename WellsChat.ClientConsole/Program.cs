@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using System.Drawing;
 using System.Globalization;
+using WellsChat.ClientConsole;
 using WellsChat.Shared;
 using static System.Net.Mime.MediaTypeNames;
 
@@ -11,14 +13,23 @@ namespace WellsChat.Clientconsole
     {
         static string _accessToken = string.Empty;
         static async Task Main(string[] args) {
-            IPublicClientApplication app = PublicClientApplicationBuilder.Create(Environment.GetEnvironmentVariable("WellsChat_ClientId")) 
+            IConfiguration config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json") //secrets
+                .Build()
+                //.Encrypt();
+                .Decrypt(Environment.GetEnvironmentVariable("WellsChat_Key"), Environment.GetEnvironmentVariable("WellsChat_Iv"));
+
+            Settings settings = config.GetRequiredSection("WellsChat").Get<Settings>();
+
+
+            IPublicClientApplication app = PublicClientApplicationBuilder.Create(settings.ClientId) 
                 .WithDefaultRedirectUri()
                 .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
-                .WithTenantId(Environment.GetEnvironmentVariable("WellsChat_TenantId"))
+                .WithTenantId(settings.TenantId)
                 .Build();
             AuthenticationResult result;
             var account = await app.GetAccountsAsync();
-            var scopes = new string[] { Environment.GetEnvironmentVariable("WellsChat_ApiScope") };
+            var scopes = new string[] { settings.ApiScope };
 
             try
             {
@@ -47,7 +58,7 @@ namespace WellsChat.Clientconsole
             }
 
             var hubConnection = new HubConnectionBuilder()
-                .WithUrl(Environment.GetEnvironmentVariable("WellsChat_Url"), options =>
+                .WithUrl(settings.Url, options =>
                 {
                     options.AccessTokenProvider = () => Task.FromResult(_accessToken);
                 })
