@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
+﻿using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using WellsChat.ClientConsole;
@@ -9,28 +11,30 @@ namespace WellsChat.Clientconsole
     class Program
     {
         static string _accessToken = string.Empty;
+        static SecretClient secretClient = null;
         static async Task Main(string[] args) {
-            var cipher = new Aes256Cipher(
-                Convert.FromBase64String(Environment.GetEnvironmentVariable("WellsChat_Key")), 
-                Convert.FromBase64String(Environment.GetEnvironmentVariable("WellsChat_IV")));
+            Console.WriteLine("Authenticating...");
 
             IConfiguration config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json") //secrets
-                .Build()
-                //.Encrypt();
-                .Decrypt(cipher);
+                .AddJsonFile("appsettings.json")
+                .Build();
 
-            Settings settings = config.GetRequiredSection("WellsChat").Get<Settings>();
+            var credentials = new DefaultAzureCredential();         
+            secretClient = new SecretClient(new Uri(config.GetValue<string>("VaultUri")), credentials);
+            
 
+            var cipher = new Aes256Cipher(
+                Convert.FromBase64String(secretClient.GetSecret("Key").Value.Value),
+                Convert.FromBase64String(secretClient.GetSecret("IV").Value.Value));
 
-            IPublicClientApplication app = PublicClientApplicationBuilder.Create(settings.ClientId) 
+            IPublicClientApplication app = PublicClientApplicationBuilder.Create(secretClient.GetSecret("ClientId").Value.Value) 
                 .WithDefaultRedirectUri()
                 .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
-                .WithTenantId(settings.TenantId)
+                .WithTenantId(secretClient.GetSecret("TenantId").Value.Value)
                 .Build();
             AuthenticationResult result;
             var account = await app.GetAccountsAsync();
-            var scopes = new string[] { settings.ApiScope };
+            var scopes = new string[] { secretClient.GetSecret("ApiScope").Value.Value };
 
             try
             {
@@ -59,13 +63,14 @@ namespace WellsChat.Clientconsole
             }
 
             var hubConnection = new HubConnectionBuilder()
-                .WithUrl(settings.Url, options =>
+                .WithUrl(secretClient.GetSecret("HubUrl").Value.Value, options =>
                 {
                     options.AccessTokenProvider = () => Task.FromResult(_accessToken);
                 })
                 .WithAutomaticReconnect()
-                .Build();            
-
+                .Build();
+            Console.SetCursorPosition(0, Console.CursorTop - 1);
+            Console.WriteLine("Authenticated    ");
             try
             {
                 Console.WriteLine("Connecting...");
