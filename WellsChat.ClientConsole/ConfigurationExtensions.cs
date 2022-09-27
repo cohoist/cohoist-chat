@@ -7,10 +7,8 @@ namespace WellsChat.ClientConsole
 {
     public static class ConfigurationRootExtensions
     {
-        public static IConfigurationRoot Decrypt(this IConfigurationRoot root, string key, string iv)
+        public static IConfigurationRoot Decrypt(this IConfigurationRoot root, Aes256Cipher cipher)
         {
-            var cipher = new Aes256Cipher(Convert.FromBase64String(key), Convert.FromBase64String(iv));
-            using var aes = Aes.Create();
             DecryptChildren(root);
             return root;
 

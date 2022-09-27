@@ -21,17 +21,16 @@ namespace WellsChat.Server.Hubs
         {
             if (!string.IsNullOrWhiteSpace(message))
             {
-                if(message.ToLower() == "!users")
+                switch (message.ToLower())
                 {
-                    await Clients.Caller.SendAsync("ListUsers", _appData.MemoryCache.Get<List<User>>(ACTIVE_USERS));
+                    case "!users":
+                        await Clients.Caller.SendAsync("ListUsers", _appData.MemoryCache.Get<List<User>>(ACTIVE_USERS));
+                        break;
+                    default:
+                        await Clients.Others.SendAsync("ReceiveMessage", DateTime.Now, Context.User.Claims.FirstOrDefault(c => c.Type.Equals("name")).Value, message);
+                        await Clients.Caller.SendAsync("SendSuccess", DateTime.Now, Context.User.Claims.FirstOrDefault(c => c.Type.Equals("name")).Value, message);
+                        break;
                 }
-                else
-                {
-                    await Clients.Others.SendAsync("ReceiveMessage", DateTime.Now, Context.User.Claims.FirstOrDefault(c => c.Type.Equals("name")).Value, message);
-                    await Clients.Caller.SendAsync("SendSuccess", DateTime.Now, Context.User.Claims.FirstOrDefault(c => c.Type.Equals("name")).Value, message);
-                }
-                
-                //await Clients.Caller.SendAsync("SendSuccess");
             }
         }
 

@@ -1,11 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
-using System.Drawing;
-using System.Globalization;
 using WellsChat.ClientConsole;
 using WellsChat.Shared;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace WellsChat.Clientconsole
 {
@@ -13,11 +10,15 @@ namespace WellsChat.Clientconsole
     {
         static string _accessToken = string.Empty;
         static async Task Main(string[] args) {
+            var cipher = new Aes256Cipher(
+                Convert.FromBase64String(Environment.GetEnvironmentVariable("WellsChat_Key")), 
+                Convert.FromBase64String(Environment.GetEnvironmentVariable("WellsChat_IV")));
+
             IConfiguration config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json") //secrets
                 .Build()
                 //.Encrypt();
-                .Decrypt(Environment.GetEnvironmentVariable("WellsChat_Key"), Environment.GetEnvironmentVariable("WellsChat_Iv"));
+                .Decrypt(cipher);
 
             Settings settings = config.GetRequiredSection("WellsChat").Get<Settings>();
 
@@ -100,8 +101,7 @@ namespace WellsChat.Clientconsole
 
             hubConnection.On<DateTime, string, string>("ReceiveMessage", (time, user, message) =>
             {
-                //TODO: decrypt message
-
+                message = cipher.Decrypt(message);
                 var receivedMsg = $"{time.ToString("g")} | {user}: {message}";
                 Console.SetCursorPosition(0, Console.CursorTop);
                 Console.BackgroundColor = ConsoleColor.DarkBlue;
@@ -112,6 +112,7 @@ namespace WellsChat.Clientconsole
 
             hubConnection.On<DateTime, string, string>("SendSuccess", (time, user, message) =>
             {
+                message = cipher.Decrypt(message);
                 var receivedMsg = $"{time.ToString("g")} | {user}: {message}";
                 Console.SetCursorPosition(0, Console.CursorTop - 1);
                 Console.BackgroundColor = ConsoleColor.DarkGreen;
@@ -129,7 +130,7 @@ namespace WellsChat.Clientconsole
                     Console.WriteLine($"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}]");
                 }
                 Console.Write("> ");
-            });
+            });            
 
             while (true)
             {
@@ -145,9 +146,13 @@ namespace WellsChat.Clientconsole
                 {
                     if (!string.IsNullOrWhiteSpace(msg))
                     {
-                        //TODO: encrypt message, then send
-                        try
+                        if(msg.ToLower() != "!users") //do not encrypt command messages
                         {
+                            msg = cipher.Encrypt(msg);
+                        }
+
+                        try
+                        {                            
                             await hubConnection.SendAsync("SendMessage", msg);
                         }
                         catch
