@@ -1,5 +1,6 @@
 ﻿using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
+using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
@@ -25,13 +26,29 @@ namespace WellsChat.Clientconsole
 
             var cipher = new Aes256Cipher(
                 Convert.FromBase64String(secretClient.GetSecret("Key").Value.Value),
-                Convert.FromBase64String(secretClient.GetSecret("IV").Value.Value));
+                Convert.FromBase64String(secretClient.GetSecret("IV").Value.Value));            
 
             IPublicClientApplication app = PublicClientApplicationBuilder.Create(secretClient.GetSecret("ClientId").Value.Value) 
                 .WithDefaultRedirectUri()
                 .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
                 .WithTenantId(secretClient.GetSecret("TenantId").Value.Value)
                 .Build();
+
+            var storageProperties = new StorageCreationPropertiesBuilder(CacheSettings.CacheFileName, CacheSettings.CacheDir)
+                .WithLinuxKeyring(
+                    CacheSettings.LinuxKeyRingSchema,
+                    CacheSettings.LinuxKeyRingCollection,
+                    CacheSettings.LinuxKeyRingLabel,
+                    CacheSettings.LinuxKeyRingAttr1,
+                    CacheSettings.LinuxKeyRingAttr2)
+                .WithMacKeyChain(
+                    CacheSettings.KeyChainServiceName,
+                    CacheSettings.KeyChainAccountName)
+                .Build();
+
+            var cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties);
+            cacheHelper.RegisterCache(app.UserTokenCache);
+
             AuthenticationResult result;
             var account = await app.GetAccountsAsync();
             var scopes = new string[] { secretClient.GetSecret("ApiScope").Value.Value };
