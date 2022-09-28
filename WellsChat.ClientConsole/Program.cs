@@ -109,8 +109,9 @@ namespace WellsChat.Clientconsole
                 {
                     Console.SetCursorPosition(0, Console.CursorTop);
                     Console.BackgroundColor = ConsoleColor.DarkCyan;
-                    Console.WriteLine($"{DateTime.Now.ToString("g")} | {user.Email} ({user.DisplayName}) [{user.ActiveConnections}] connected.");
+                    Console.Write($"{DateTime.Now.ToString("g")} | {user.Email} ({user.DisplayName}) [{user.ActiveConnections}] connected.");
                     Console.ResetColor();
+                    Console.WriteLine();
                     Console.Write("> ");
                 });
 
@@ -118,8 +119,9 @@ namespace WellsChat.Clientconsole
                 {
                     Console.SetCursorPosition(0, Console.CursorTop);
                     Console.BackgroundColor = ConsoleColor.DarkGray;
-                    Console.WriteLine($"{DateTime.Now.ToString("g")} | {user.Email} ({user.DisplayName}) [{user.ActiveConnections}] disconnected.");
+                    Console.Write($"{DateTime.Now.ToString("g")} | {user.Email} ({user.DisplayName}) [{user.ActiveConnections}] disconnected.");
                     Console.ResetColor();
+                    Console.WriteLine();
                     Console.Write("> ");
                 });
 
@@ -130,8 +132,9 @@ namespace WellsChat.Clientconsole
                     var receivedMsg = $"{DateTime.Now.ToString("g")} | {message.SenderDisplayName}: {message.Payload}";
                     Console.SetCursorPosition(0, Console.CursorTop);
                     Console.BackgroundColor = isMe ? ConsoleColor.DarkGreen : ConsoleColor.DarkBlue;
-                    Console.WriteLine(receivedMsg);
+                    Console.Write(receivedMsg);
                     Console.ResetColor();
+                    Console.WriteLine();
                     Console.Write("> ");
                 });
 
