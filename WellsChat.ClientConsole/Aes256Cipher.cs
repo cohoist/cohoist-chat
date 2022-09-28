@@ -1,51 +1,96 @@
-﻿using System;
+﻿using Azure.Messaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using WellsChat.Shared;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace WellsChat.ClientConsole
 {
     public class Aes256Cipher
     {
         private readonly byte[] _key;
-        private readonly byte[] _iv;
 
-        public Aes256Cipher(byte[] key, byte[] iv)
+        public Aes256Cipher(byte[] key)
         {
             _key = key;
-            _iv = iv;
         }
 
-        public string Decrypt(string value)
+        private string DecryptString(string text, string iv)
         {
-            var ivAndCipherText = Convert.FromBase64String(value);
-            using var aes = Aes.Create();
-            aes.IV = _iv;
-            aes.Key = _key;
-            using var cipher = aes.CreateDecryptor();
-            var cipherText = ivAndCipherText.Skip(aes.IV.Length).ToArray();
-            var text = cipher.TransformFinalBlock(cipherText, 0, cipherText.Length);
-            return Encoding.UTF8.GetString(text);
+            using (var aes = Aes.Create())
+            {
+                aes.Key = _key;
+                aes.IV = Convert.FromBase64String(iv);
+                using var decryptor = aes.CreateDecryptor();
+
+                byte[] bytes = Convert.FromBase64String(text);
+                using (MemoryStream ms = new MemoryStream(bytes))
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader sr = new StreamReader(cs))
+                        {
+                            return sr.ReadToEnd();
+                        }
+                    }
+                }
+            }            
         }
 
-        public string Encrypt(string value)
+        public Message DecryptMessage(Message message)
         {
-            using var aes = Aes.Create();
-            aes.Key = _key;
-            aes.IV = _iv;
-            using var cipher = aes.CreateEncryptor();
-            var text = Encoding.UTF8.GetBytes(value);
-            var cipherText = cipher.TransformFinalBlock(text, 0, text.Length);
-            return Convert.ToBase64String(aes.IV.Concat(cipherText).ToArray());
+            message.Payload = DecryptString(message.Payload, message.IV);
+            message.SenderEmail = DecryptString(message.SenderEmail, message.IV);
+            message.SenderDisplayName = DecryptString(message.SenderDisplayName, message.IV);
+
+            return message;
         }
 
-        public static string GenerateNewKey()
+        public string EncryptString(string text, string iv)
+        {
+            using (var aes = Aes.Create())
+            {
+                aes.Key = _key;
+                aes.IV = Convert.FromBase64String(iv);
+                using var encryptor = aes.CreateEncryptor();
+
+                byte[] encryptedData;
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    using (CryptoStream cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter sw = new StreamWriter(cs))
+                        {
+                            sw.Write(text);
+                        }
+                        encryptedData = ms.ToArray();
+                    }
+                }
+
+                return Convert.ToBase64String(encryptedData);
+            }
+        }
+
+        public Message EncryptMessage(Message message)
+        {
+            message.IV = GenerateIV();
+            message.Payload = EncryptString(message.Payload, message.IV);
+            message.SenderEmail = EncryptString(message.SenderEmail, message.IV);
+            message.SenderDisplayName = EncryptString(message.SenderDisplayName, message.IV);
+
+            return message;
+        }
+
+        public static string GenerateIV()
         {
             using var aes = Aes.Create();
-            aes.GenerateKey();
-            return Convert.ToBase64String(aes.Key);
+            aes.GenerateIV();
+            return Convert.ToBase64String(aes.IV);
         }
     }
 }
