@@ -21,17 +21,8 @@ namespace WellsChat.Clientconsole
                 .AddJsonFile("appsettings.json")
                 .Build();
 
-            try
-            {
-                var credentials = new DefaultAzureCredential();
-                secretClient = new SecretClient(new Uri(config.GetValue<string>("VaultUri")), credentials);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Not authorized");
-                Console.ReadLine();
-                Environment.Exit(0);
-            }
+            var credentials = new DefaultAzureCredential(true);
+            secretClient = new SecretClient(new Uri(config.GetValue<string>("VaultUri")), credentials);
             
 
             var cipher = new Aes256Cipher(Convert.FromBase64String(secretClient.GetSecret("Key").Value.Value));            
