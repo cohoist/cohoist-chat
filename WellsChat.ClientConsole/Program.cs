@@ -134,7 +134,7 @@ namespace WellsChat.Clientconsole
                     Console.BackgroundColor = isMe ? ConsoleColor.DarkGreen : ConsoleColor.DarkBlue;
                     Console.Write(receivedMsg);
                     Console.ResetColor();
-                    Console.WriteLine();
+                    Console.WriteLine(message.SenderEmail == me.Email ? null : "\a");
                     Console.Write("> ");
                 });
 
