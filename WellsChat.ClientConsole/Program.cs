@@ -138,6 +138,11 @@ namespace WellsChat.Clientconsole
                     Console.Write("> ");
                 });
 
+                hubConnection.On("SendSuccess", () =>
+                {                   
+                    Console.SetCursorPosition(0, Console.CursorTop - 1);
+                });
+
                 hubConnection.On<List<User>>("ListUsers", (users) =>
                 {
                     Console.SetCursorPosition(0, Console.CursorTop);
