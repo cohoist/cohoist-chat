@@ -41,9 +41,24 @@ namespace WellsChat.Clientconsole
                         await hubConnection.DisposeAsync();
                         Environment.Exit(0);
                     }
-                    else if(message.Payload.ToLower() == "!reconnect")
+                    else if (message.Payload.ToLower() == "!reconnect")
                     {
-                        await EstablishConnection();
+                        //Command will only work if in disconnected state
+                        if (hubConnection.State == HubConnectionState.Disconnected)
+                        {
+                            try
+                            {
+                                Console.WriteLine("Connecting...");
+                                await hubConnection.StartAsync();
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Connected    ");
+                            }
+                            catch
+                            {
+                                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                                Console.WriteLine("Connection failed. Enter !reconnect to try again.");                                
+                            }
+                        }
                     }
                     else
                     {
@@ -213,6 +228,79 @@ namespace WellsChat.Clientconsole
                 }
                 Console.Write("> ");
             });
+
+            hubConnection.Closed += HubConnection_Closed;
+            hubConnection.Reconnected += HubConnection_Reconnected;
+            hubConnection.Reconnecting += HubConnection_Reconnecting;
+        }
+
+        private static Task HubConnection_Reconnecting(Exception? arg)
+        {
+            Console.SetCursorPosition(0, Console.CursorTop);
+            Console.Write($"Connection lost. Reconnecting... ");
+            return Task.CompletedTask;
+        }
+
+        private static Task HubConnection_Reconnected(string? arg)
+        {
+            Console.WriteLine($"Connected");
+            Console.Write("> ");
+            return Task.CompletedTask;
+        }
+
+        private static async Task HubConnection_Closed(Exception? arg)
+        {
+            var tryAgainString = " Try again in ";
+            Console.WriteLine($"Timed out.");
+            for (int i = 1; i <= 5; i++) //attempt to reconnect 5 times
+            {                
+                Console.Write($"Attempting to reconnect {i}/5... ");
+                try
+                {
+                    await hubConnection.StartAsync();
+                    Console.WriteLine("Connected");
+                    return;
+                }
+                catch
+                {
+                    //Connection failed
+                    if (i < 5)
+                    {
+                        Console.BackgroundColor = ConsoleColor.DarkRed;
+                        Console.Write($"FAILED.");
+                        Console.ResetColor();
+                        Console.Write(tryAgainString);
+                        for (int j = i * 5; j > 0; j--) //wait i * 5 seconds before trying again 
+                        {
+                            Console.Write($"{j}");
+                            await Task.Delay(1000);
+                            //erase current countdown number, get ready to write new number
+                            if(j > 1)
+                            {
+                                Console.SetCursorPosition(Console.CursorLeft - j.ToString().Length, Console.CursorTop);
+                                for (int k = 0; k < j.ToString().Length; k++)
+                                    Console.Write(" ");
+                                Console.SetCursorPosition(Console.CursorLeft - j.ToString().Length, Console.CursorTop);
+                            }
+                            else //if countdown complete
+                            {
+                                Console.SetCursorPosition(Console.CursorLeft - j.ToString().Length - tryAgainString.Length, Console.CursorTop);
+                                for (int k = 0; k < (j.ToString().Length + tryAgainString.Length); k++)
+                                    Console.Write(" ");
+                                Console.SetCursorPosition(Console.CursorLeft - j.ToString().Length - tryAgainString.Length, Console.CursorTop);
+                            }                            
+                        }
+                        Console.WriteLine();
+                    }
+                }
+            }
+            //Failed 5 reconnection attempts
+            Console.BackgroundColor = ConsoleColor.DarkRed;
+            Console.Write($"FAILED.");
+            Console.ResetColor();
+            Console.WriteLine($" Enter !reconnect to try again.");
+            Console.Write("> ");       
+            return;
         }
     }
 }
