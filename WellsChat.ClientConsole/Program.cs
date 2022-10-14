@@ -25,11 +25,11 @@ namespace WellsChat.Clientconsole
 
             var credentials = new DefaultAzureCredential(true);
             secretClient = new SecretClient(new Uri(config.GetValue<string>("VaultUri")), credentials);
-            Console.SetCursorPosition(0, Console.CursorTop - 1);
-            Console.WriteLine("Authenticated    ");
+            Console.SetCursorPosition(0, Console.CursorTop - 1);            
 
             cipher = new Aes256Cipher(Convert.FromBase64String(secretClient.GetSecret("Key").Value.Value));
 
+            Console.WriteLine("Authenticated    ");
             if (await EstablishConnection()) {
                 while (true)
                 {
@@ -131,8 +131,6 @@ namespace WellsChat.Clientconsole
                     DisplayName = result.ClaimsPrincipal.FindFirst("name").Value
                 };
 
-                Console.SetCursorPosition(0, Console.CursorTop - 1);
-                Console.WriteLine("Connected    ");
                 hubConnection = new HubConnectionBuilder()
                     .WithUrl(secretClient.GetSecret("HubUrl").Value.Value, options =>
                     {
