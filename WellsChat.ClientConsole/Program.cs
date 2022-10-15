@@ -12,10 +12,11 @@ namespace WellsChat.Clientconsole
     class Program
     {
         static string _accessToken = string.Empty;
+        static IPublicClientApplication app = null;
         static SecretClient secretClient = null;
         static HubConnection hubConnection = null;
         static Aes256Cipher cipher = null;
-        static User me = null;
+        static User me = null;        
         static async Task Main(string[] args) {
             Console.WriteLine("Authenticating...");
 
@@ -30,7 +31,13 @@ namespace WellsChat.Clientconsole
             cipher = new Aes256Cipher(Convert.FromBase64String(secretClient.GetSecret("Key").Value.Value));
 
             Console.WriteLine("Authenticated    ");
+            app = BuildApp();
+            if (app == null) return;
+            await RegisterCache();
+            Console.WriteLine("Connecting...");
             if (await EstablishConnection()) {
+                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                Console.WriteLine("Connected    ");
                 while (true)
                 {
                     Console.Write("> ");
@@ -46,17 +53,16 @@ namespace WellsChat.Clientconsole
                         //Command will only work if in disconnected state
                         if (hubConnection.State == HubConnectionState.Disconnected)
                         {
-                            try
+                            Console.WriteLine("Connecting...");
+                            if (await EstablishConnection())
                             {
-                                Console.WriteLine("Connecting...");
-                                await hubConnection.StartAsync();
                                 Console.SetCursorPosition(0, Console.CursorTop - 1);
                                 Console.WriteLine("Connected    ");
                             }
-                            catch
+                            else
                             {
                                 Console.SetCursorPosition(0, Console.CursorTop - 1);
-                                Console.WriteLine("Connection failed. Enter !reconnect to try again.");                                
+                                Console.WriteLine("Connection failed. Enter !reconnect to try again.");
                             }
                         }
                     }
@@ -83,20 +89,16 @@ namespace WellsChat.Clientconsole
                     }
                 }
             }
+            else
+            {
+                Console.WriteLine("Error connecting to server.");
+                Console.ReadLine();
+                Environment.Exit(0);
+            }
         }
-        private static async Task<bool> EstablishConnection()
+
+        private static async Task RegisterCache()
         {
-            if (hubConnection != null && hubConnection.State != HubConnectionState.Disconnected)
-                await hubConnection.StopAsync();
-                
-
-            Console.WriteLine("Connecting...");
-            IPublicClientApplication app = PublicClientApplicationBuilder.Create(secretClient.GetSecret("ClientId").Value.Value)
-                .WithDefaultRedirectUri()
-                .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
-                .WithTenantId(secretClient.GetSecret("TenantId").Value.Value)
-                .Build();
-
             var storageProperties = new StorageCreationPropertiesBuilder(CacheSettings.CacheFileName, CacheSettings.CacheDir)
                 .WithLinuxKeyring(
                     CacheSettings.LinuxKeyRingSchema,
@@ -111,6 +113,24 @@ namespace WellsChat.Clientconsole
 
             var cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties);
             cacheHelper.RegisterCache(app.UserTokenCache);
+        }
+
+        private static IPublicClientApplication BuildApp()
+        {
+            return PublicClientApplicationBuilder.Create(secretClient.GetSecret("ClientId").Value.Value)
+                .WithDefaultRedirectUri()
+                .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
+                .WithTenantId(secretClient.GetSecret("TenantId").Value.Value)
+                .Build();
+        }
+
+        private static async Task<bool> EstablishConnection()
+        {
+            if (hubConnection != null && hubConnection.State != HubConnectionState.Disconnected)
+            {
+                await hubConnection.StopAsync();
+                await hubConnection.DisposeAsync();
+            }
 
             AuthenticationResult result;
             var account = await app.GetAccountsAsync();
@@ -146,35 +166,29 @@ namespace WellsChat.Clientconsole
                     DisplayName = result.ClaimsPrincipal.FindFirst("name").Value
                 };
 
+                
                 hubConnection = new HubConnectionBuilder()
                     .WithUrl(secretClient.GetSecret("HubUrl").Value.Value, options =>
                     {
                         options.AccessTokenProvider = () => Task.FromResult(_accessToken);
                     })
                     .WithAutomaticReconnect()
-                    .Build();
+                    .Build();                
+                    
 
                 try
                 {
                     AddHandlers();
                     await hubConnection.StartAsync();
-                    Console.SetCursorPosition(0, Console.CursorTop - 1);
-                    Console.WriteLine("Connected    ");
                     return true;
                 }
                 catch (HttpRequestException e)
-                {
-                    Console.WriteLine("Error connecting to server.");
-                    Console.ReadLine();
-                    Environment.Exit(0);
+                {                    
                     return false;
                 }
             }
             else
             {
-                Console.WriteLine("Error connecting to server.");
-                Console.ReadLine();
-                Environment.Exit(0);
                 return false;
             }
         }
@@ -250,19 +264,19 @@ namespace WellsChat.Clientconsole
 
         private static async Task HubConnection_Closed(Exception? arg)
         {
+            if (arg == null) return; //if client deliberately disconnects, do nothing
             var tryAgainString = " Try again in ";
             Console.WriteLine($"Timed out.");
             for (int i = 1; i <= 5; i++) //attempt to reconnect 5 times
             {                
                 Console.Write($"Attempting to reconnect {i}/5... ");
-                try
+                if(await EstablishConnection())
                 {
-                    await hubConnection.StartAsync();
-                    Console.WriteLine("Connected");
+                    Console.WriteLine("Connected    ");
                     return;
                 }
-                catch
-                {
+                else
+                {               
                     //Connection failed
                     if (i < 5)
                     {
