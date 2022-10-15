@@ -27,7 +27,7 @@ namespace WellsChat.Server.Hubs
                         await Clients.Caller.SendAsync("ListUsers", _appData.MemoryCache.Get<List<User>>(ACTIVE_USERS));
                         break;
                     default:
-                        await Clients.Caller.SendAsync("SendSuccess");
+                        await Clients.Caller.SendAsync("SendSuccess", message);
                         await Clients.All.SendAsync("ReceiveMessage", message);                        
                         break;
                 }

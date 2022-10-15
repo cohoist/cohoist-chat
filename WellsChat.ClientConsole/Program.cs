@@ -219,7 +219,7 @@ namespace WellsChat.Clientconsole
                 message = cipher.DecryptMessage(message);
                 bool isMe = message.SenderEmail == me.Email;
                 var receivedMsg = $"{DateTime.Now.ToString("g")} | {message.SenderDisplayName}: {message.Payload}";                
-                Console.SetCursorPosition(0, Console.CursorTop - (isMe ? (int)((message.Payload.Length + 2) / Console.BufferWidth) : 0)); //calculate number of rows this message spans
+                Console.SetCursorPosition(0, Console.CursorTop);
                 Console.BackgroundColor = isMe ? ConsoleColor.DarkGreen : ConsoleColor.DarkBlue;
                 Console.Write(receivedMsg);
                 Console.ResetColor();
@@ -227,9 +227,9 @@ namespace WellsChat.Clientconsole
                 Console.Write("> ");
             });
 
-            hubConnection.On("SendSuccess", () =>
+            hubConnection.On<Message>("SendSuccess", (message) =>
             {
-                Console.SetCursorPosition(0, Console.CursorTop - 1);
+                Console.SetCursorPosition(0, Console.CursorTop - 1 - (int)((message.Payload.Length + 2) / Console.BufferWidth)); //calculate number of rows this message spans
             });
 
             hubConnection.On<List<User>>("ListUsers", (users) =>
