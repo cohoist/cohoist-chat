@@ -4,7 +4,6 @@ using Microsoft.Identity.Client.Extensions.Msal;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
-using WellsChat.ClientConsole;
 using WellsChat.Shared;
 
 namespace WellsChat.Clientconsole

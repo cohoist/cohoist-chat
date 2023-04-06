@@ -1,14 +1,6 @@
-﻿using Azure.Messaging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using WellsChat.Shared;
-using static System.Net.Mime.MediaTypeNames;
+﻿using System.Security.Cryptography;
 
-namespace WellsChat.ClientConsole
+namespace WellsChat.Shared
 {
     public class Aes256Cipher
     {
