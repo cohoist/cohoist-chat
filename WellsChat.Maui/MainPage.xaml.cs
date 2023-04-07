@@ -211,7 +211,7 @@ namespace WellsChat.Maui
         {
             Application.Current.Dispatcher.Dispatch(() => {
                 vm.Messages.Add(message);
-                //MessagesList.ScrollTo(vm.Messages.Count-1);
+                //MessagesList.ScrollTo(vm.Messages.Last());
             });
         }
         private void AddHandlers()
