@@ -6,16 +6,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
-using Microsoft.Maui.ApplicationModel.DataTransfer;
-using Microsoft.Maui.Controls;
-using Microsoft.Maui.Controls.PlatformConfiguration.AndroidSpecific;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using WellsChat.Shared;
 using Application = Microsoft.Maui.Controls.Application;
 
@@ -218,8 +209,10 @@ namespace WellsChat.Maui
 
         private void AddMessage(Message message)
         {
-            Application.Current.Dispatcher.Dispatch(() => vm.Messages.Add(message));
-            Application.Current.Dispatcher.Dispatch(() => MessagesList.ScrollTo(vm.Messages.Last()));
+            Application.Current.Dispatcher.Dispatch(() => {
+                vm.Messages.Add(message);
+                //MessagesList.ScrollTo(vm.Messages.Count-1);
+            });
         }
         private void AddHandlers()
         {

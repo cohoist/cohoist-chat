@@ -8,8 +8,13 @@
     <ContentPage.BindingContext>
         <local:ChatViewModel />
     </ContentPage.BindingContext>
-    <StackLayout>
-        <CollectionView x:Name="MessagesList" ItemsSource="{Binding Messages}" VerticalOptions="FillAndExpand" Margin="20" >
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <CollectionView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" ItemsUpdatingScrollMode="KeepLastItemInView" Margin="20" >
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -20,7 +25,7 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="0">
                             <VerticalStackLayout.Triggers>
                                 <DataTrigger TargetType="VerticalStackLayout" Binding="{Binding MessageType}" Value="{x:Static shared:MessageTypeEnum.Info}">
                                     <Setter Property="BackgroundColor" Value="{x:Null}" />
@@ -38,7 +43,7 @@
                                     <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource LightBlue}, Dark={StaticResource DarkBlue}}" />
                                 </DataTrigger>
                             </VerticalStackLayout.Triggers>
-                            <Label Grid.Column="0" Text="{Binding SenderDisplayName, StringFormat='{0}:'}" Margin="8,0" HorizontalOptions="End" FontAttributes="Bold"/>
+                            <Label Text="{Binding SenderDisplayName, StringFormat='{0}:'}" Margin="8,0" HorizontalOptions="End" FontAttributes="Bold"/>
                             <Label BindingContext="{x:Static sys:DateTime.Now}" Text="{Binding StringFormat='{0:g}'}" Margin="8,0" HorizontalOptions="End" FontSize="12"/>
                         </VerticalStackLayout>
                         <Label Grid.Column="1" Text="{Binding Payload}" ToolTipProperties.Text="Double-click to copy to clipboard" Margin="8,0" VerticalTextAlignment="Center" LineBreakMode="WordWrap">
@@ -51,7 +56,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-        <HorizontalStackLayout Margin="20,0,0,0">
+        <HorizontalStackLayout Grid.Row="1" Margin="20,0,0,0">
             <CheckBox x:Name="checkBox" />
             <Label Text="Multiline" VerticalTextAlignment="Center">
                 <Label.Triggers>
@@ -62,7 +67,7 @@
             </Label>
         </HorizontalStackLayout>
 
-        <StackLayout Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="20,0,20,20">
+        <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="20,0,20,20">
             <Editor x:Name="MessageEditor" Placeholder="Enter your message" MinimumHeightRequest="120" AutoSize="TextChanges" HorizontalOptions="FillAndExpand" Margin="0,0,8,0">
                 <Editor.Triggers>
                     <DataTrigger TargetType="Editor" Binding="{Binding Source={x:Reference checkBox}, Path=IsChecked}" Value="true">
@@ -86,5 +91,5 @@
             </Entry>
             <Button Text=">" Clicked="SendButton_Clicked"/>
         </StackLayout>
-    </StackLayout>
+    </Grid>
 </ContentPage>
