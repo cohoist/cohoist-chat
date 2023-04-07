@@ -215,6 +215,12 @@ namespace WellsChat.Maui
                 return false;
             }
         }
+
+        private void AddMessage(Message message)
+        {
+            Application.Current.Dispatcher.Dispatch(() => vm.Messages.Add(message));
+            Application.Current.Dispatcher.Dispatch(() => MessagesList.ScrollTo(vm.Messages.Last()));
+        }
         private void AddHandlers()
         {
             hubConnection.On<User>("UserConnected", (user) =>
@@ -225,7 +231,7 @@ namespace WellsChat.Maui
                     MessageType = MessageTypeEnum.Connected,
                     Payload = $"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}] connected."
                 };
-                Application.Current.Dispatcher.Dispatch(() => vm.Messages.Add(message));
+                AddMessage(message);
             });
 
             hubConnection.On<User>("UserDisconnected", (user) =>
@@ -236,7 +242,7 @@ namespace WellsChat.Maui
                     MessageType = MessageTypeEnum.Disconnected,
                     Payload = $"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}] disconnected."
                 };
-                Application.Current.Dispatcher.Dispatch(() => vm.Messages.Add(message));
+                AddMessage(message);
             });
 
             hubConnection.On<Message>("ReceiveMessage", (message) =>
@@ -245,7 +251,7 @@ namespace WellsChat.Maui
                 bool isMe = message.SenderEmail == me.Email;
                 if (isMe) message.MessageType = MessageTypeEnum.Me;
                 else message.MessageType = MessageTypeEnum.NotMe;
-                Application.Current.Dispatcher.Dispatch(() => vm.Messages.Add(message));
+                AddMessage(message);
             });
 
             hubConnection.On<Message>("SendSuccess", (message) =>
@@ -265,7 +271,7 @@ namespace WellsChat.Maui
                 {
                     message.Payload += $"\n{user.Email} ({user.DisplayName}) [{user.ActiveConnections}]";
                 }
-                Application.Current.Dispatcher.Dispatch(() => vm.Messages.Add(message));
+                AddMessage(message);
             });
 
             hubConnection.Closed += HubConnection_Closed;
