@@ -15,7 +15,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" Margin="20" >
+        <sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" AutoFitMode="Height" Margin="20" >
             <sf:SfListView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -24,7 +24,7 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <VerticalStackLayout Grid.Column="0">
                             <VerticalStackLayout.Triggers>
@@ -50,7 +50,7 @@
                         <Label Grid.Column="1" Text="{Binding Payload}" ToolTipProperties.Text="Double-click to copy to clipboard" Margin="8,0" VerticalTextAlignment="Center" LineBreakMode="WordWrap">
                             <Label.GestureRecognizers>
                                 <TapGestureRecognizer Tapped="OnLabelTappedAsync" CommandParameter="{Binding Payload}" Buttons="Primary"
-                                        NumberOfTapsRequired="2" />
+                                            NumberOfTapsRequired="2" />
                             </Label.GestureRecognizers>
                         </Label>
                     </Grid>
