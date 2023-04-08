@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Maui;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Syncfusion.Maui.Core.Hosting;
 using System.Reflection;
 
 namespace WellsChat.Maui
@@ -17,7 +18,8 @@ namespace WellsChat.Maui
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-                });
+                })
+                .ConfigureSyncfusionCore(); ;
 
             builder.Services.AddTransient<MainPage>();
             using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{typeof(App).Namespace}.appsettings.json");

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
+using Syncfusion.Maui.ListView;
 using System.Collections.ObjectModel;
 using WellsChat.Shared;
 using Application = Microsoft.Maui.Controls.Application;
@@ -211,7 +212,7 @@ namespace WellsChat.Maui
         {
             Application.Current.Dispatcher.Dispatch(() => {
                 vm.Messages.Add(message);
-                //MessagesList.ScrollTo(vm.Messages.Last());
+                MessagesList.ScrollTo(vm.Messages.Last(), ScrollToPosition.End);
             });
         }
         private void AddHandlers()
