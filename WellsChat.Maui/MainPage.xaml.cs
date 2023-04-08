@@ -16,16 +16,18 @@ namespace WellsChat.Maui
     public partial class ChatViewModel
     {
         public ObservableCollection<Message> Messages { get; init; }
+        public Command<string> CopyCommand { get; init; }
         public ChatViewModel()
         {
             Messages = new ObservableCollection<Message>();
+            CopyCommand = new Command<string>(async (string text) => await Clipboard.Default.SetTextAsync(text));
         }
     }
 
     public partial class MainPage : ContentPage
     {
         static HubConnection hubConnection = null;
-        public Command EntryReturnCommand { get; set; }        
+        private Command EntryReturnCommand { get; init; }
         static string _accessToken = string.Empty;
         static IPublicClientApplication app = null;
         static SecretClient secretClient = null;
@@ -35,7 +37,7 @@ namespace WellsChat.Maui
         public MainPage(IConfiguration config)
         {
             InitializeComponent();
-            BindingContext = vm;
+            BindingContext = vm;            
             EntryReturnCommand = new Command(async () => await SendMessage());
             MessageEntry.ReturnCommand = EntryReturnCommand;
 
@@ -330,18 +332,18 @@ namespace WellsChat.Maui
             Console.WriteLine($" Enter !reconnect to try again.");
             return;
         }
-        private async void OnLabelTappedAsync(object sender, TappedEventArgs args)
+        private async void CopyFromMenuAsync(object sender, EventArgs e)
         {
-            Label lblTapped = (Label)sender;
-            var item = (TapGestureRecognizer)lblTapped.GestureRecognizers[0];
-            await Clipboard.Default.SetTextAsync((string)item.CommandParameter);
-         
+            await Clipboard.Default.SetTextAsync((string)((MenuFlyoutItem)sender).CommandParameter);
+
+            /*
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
             string text = "Copied to clipboard";
             ToastDuration duration = ToastDuration.Short;
             double fontSize = 14;
             var toast = Toast.Make(text, duration, fontSize);
             await toast.Show(cancellationTokenSource.Token);
+            */
         }
     }
 }

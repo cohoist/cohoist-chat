@@ -47,11 +47,12 @@
                             <Label Text="{Binding SenderDisplayName, StringFormat='{0}:'}" Margin="8,0" HorizontalOptions="End" FontAttributes="Bold"/>
                             <Label BindingContext="{x:Static sys:DateTime.Now}" Text="{Binding StringFormat='{0:g}'}" Margin="8,0" HorizontalOptions="End" FontSize="12"/>
                         </VerticalStackLayout>
-                        <Label Grid.Column="1" Text="{Binding Payload}" ToolTipProperties.Text="Double-click to copy to clipboard" Margin="8,0" VerticalTextAlignment="Center" LineBreakMode="WordWrap">
-                            <Label.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnLabelTappedAsync" CommandParameter="{Binding Payload}" Buttons="Primary"
-                                            NumberOfTapsRequired="2" />
-                            </Label.GestureRecognizers>
+                        <Label Grid.Column="1" Text="{Binding Payload}" Margin="8,0" VerticalTextAlignment="Center" LineBreakMode="WordWrap">
+                            <FlyoutBase.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand, Source={local:ChatViewModel}}" CommandParameter="{Binding Payload}"/>
+                                </MenuFlyout>
+                            </FlyoutBase.ContextFlyout>
                         </Label>
                     </Grid>
                 </DataTemplate>
