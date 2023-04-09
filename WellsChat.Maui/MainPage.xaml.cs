@@ -8,19 +8,31 @@ using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
 using Syncfusion.Maui.ListView;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using WellsChat.Shared;
 using Application = Microsoft.Maui.Controls.Application;
 
 namespace WellsChat.Maui
 {
-    public partial class ChatViewModel
+    public enum StatusEnum{ Connecting, Connected, Reconnecting, Disconnected, Error }
+    public partial class ChatViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<Message> Messages { get; init; }
+        private StatusEnum _status;
+        private string _statusText;
+        public StatusEnum Status { get => _status; set { _status = value; OnPropertyChanged(nameof(Status)); } }
+        public string StatusText { get => _statusText; set { _statusText = value; OnPropertyChanged(nameof(StatusText)); } }
         public Command<string> CopyCommand { get; init; }
         public ChatViewModel()
         {
             Messages = new ObservableCollection<Message>();
             CopyCommand = new Command<string>(async (string text) => await Clipboard.Default.SetTextAsync(text));
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 
@@ -58,20 +70,18 @@ namespace WellsChat.Maui
                 await RegisterCache();
                 if (await EstablishConnection())
                 {
-                    Console.WriteLine("Connected    ");                    
+                    SetStatus(StatusEnum.Connected, "Connected");
                 }
                 else
                 {
-                    Console.WriteLine("Error connecting to server.");
-                    Console.ReadLine();
-                    Environment.Exit(0);
+                    SetStatus(StatusEnum.Error, "Error connecting to server.");
                 }
-            });            
+            });
         }
 
         private async Task SendMessage()
         {
-            if (!string.IsNullOrWhiteSpace(MessageEntry.Text) || !string.IsNullOrWhiteSpace(MessageEditor.Text))
+            if (vm.Status == StatusEnum.Connected && (!string.IsNullOrWhiteSpace(MessageEntry.Text) || !string.IsNullOrWhiteSpace(MessageEditor.Text)))
             {
                 Message message = new() { Payload = (checkBox.IsChecked ? MessageEditor.Text : MessageEntry.Text) };
                 if (message.Payload.ToLower() != "!users") //do not encrypt command messages
@@ -84,13 +94,13 @@ namespace WellsChat.Maui
                 try
                 {
                     await hubConnection.SendAsync("SendMessage", message);
+                    MessageEntry.Text = string.Empty;
+                    MessageEditor.Text = string.Empty;
                 }
                 catch
                 {
                     Console.WriteLine("Message not sent");
-                }
-                MessageEntry.Text = string.Empty;
-                MessageEditor.Text = string.Empty;
+                }                
             }
         }
         private async void SendButton_Clicked(object sender, EventArgs e)
@@ -166,10 +176,8 @@ namespace WellsChat.Maui
                 }
                 catch (MsalServiceException e)
                 {
-                    Console.WriteLine("Not authorized");
+                    SetStatus(StatusEnum.Error, "Not authorized");
                     result = null;
-                    Console.ReadLine();
-                    Environment.Exit(0);
                 }
             }
 
@@ -208,6 +216,14 @@ namespace WellsChat.Maui
             {
                 return false;
             }
+        }
+        private void SetStatus(StatusEnum status, string statustTest)
+        {
+            Application.Current.Dispatcher.Dispatch(() =>
+            {
+                vm.Status = status;
+                vm.StatusText = statustTest;
+            });
         }
 
         private void AddMessage(Message message)
@@ -277,13 +293,13 @@ namespace WellsChat.Maui
 
         private Task HubConnection_Reconnecting(Exception? arg)
         {
-            Console.Write($"Connection lost. Reconnecting... ");
+            SetStatus(StatusEnum.Reconnecting, "Connection lost. Reconnecting...");
             return Task.CompletedTask;
         }
 
         private Task HubConnection_Reconnected(string? arg)
         {
-            Console.WriteLine($"Connected");
+            SetStatus(StatusEnum.Connected, "Connected");
             return Task.CompletedTask;
         }
 
@@ -291,13 +307,13 @@ namespace WellsChat.Maui
         {
             if (arg == null) return; //if client deliberately disconnects, do nothing
             var tryAgainString = " Try again in ";
-            Console.WriteLine($"Timed out.");
             for (int i = 1; i <= 5; i++) //attempt to reconnect 5 times
             {
-                Console.Write($"Attempting to reconnect {i}/5... ");
+                SetStatus(StatusEnum.Reconnecting, $"Attempting to reconnect {i}/5... ");
                 if (await EstablishConnection())
                 {
-                    Console.WriteLine("Connected    ");
+                    //Connection successful
+                    SetStatus(StatusEnum.Connected, "Connected");
                     return;
                 }
                 else
@@ -305,30 +321,28 @@ namespace WellsChat.Maui
                     //Connection failed
                     if (i < 5)
                     {
-                        Console.Write($"FAILED.");
-                        Console.Write(tryAgainString);
+                        vm.StatusText += "FAILED.";
+                        vm.StatusText += tryAgainString;
                         for (int j = i * 5; j > 0; j--) //wait i * 5 seconds before trying again 
                         {
-                            Console.Write($"{j}");
+                            vm.StatusText += $"{j}";
                             await Task.Delay(1000);
                             //erase current countdown number, get ready to write new number
                             if (j > 1)
                             {                                
-                                for (int k = 0; k < j.ToString().Length; k++)
-                                    Console.Write(" ");                                
+                                vm.StatusText = vm.StatusText[..^j.ToString().Length]; //status text without timer                            
                             }
                             else //if countdown complete
-                            {                                
-                                for (int k = 0; k < (j.ToString().Length + tryAgainString.Length); k++)
-                                    Console.Write(" ");                                
+                            {
+                                vm.StatusText = vm.StatusText.Substring(0,vm.StatusText.Length - j.ToString().Length - tryAgainString.Length); //status text without tryagain string
                             }
-                        }
-                        Console.WriteLine();
+                        }                        
                     }
                 }
             }
             //Failed 5 reconnection attempts
-            Console.Write($"FAILED.");
+            SetStatus(StatusEnum.Disconnected, "Disconnected");
+            //TODO: Add reconnect button if status disconnected
             Console.WriteLine($" Enter !reconnect to try again.");
             return;
         }

@@ -6,9 +6,6 @@
              xmlns:sys="clr-namespace:System;assembly=netstandard"
              xmlns:sf="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
              x:Class="WellsChat.Maui.MainPage">
-    <ContentPage.BindingContext>
-        <local:ChatViewModel />
-    </ContentPage.BindingContext>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
@@ -58,16 +55,24 @@
                 </DataTemplate>
             </sf:SfListView.ItemTemplate>
         </sf:SfListView>
-        <HorizontalStackLayout Grid.Row="1" Margin="20,0,0,0">
-            <CheckBox x:Name="checkBox" />
-            <Label Text="Multiline" VerticalTextAlignment="Center">
-                <Label.Triggers>
-                    <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference checkBox}, Path=IsChecked}" Value="true">
-                        <Setter Property="FontAttributes" Value="Italic, Bold" />
-                    </DataTrigger>
-                </Label.Triggers>
-            </Label>
-        </HorizontalStackLayout>
+        <Grid Grid.Row="1" Margin="20,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <HorizontalStackLayout Grid.Row="1" Grid.Column="0">
+                <CheckBox x:Name="checkBox" />
+                <Label Text="Multiline" VerticalTextAlignment="Center">
+                    <Label.Triggers>
+                        <DataTrigger TargetType="Label" Binding="{Binding Source={x:Reference checkBox}, Path=IsChecked}" Value="true">
+                            <Setter Property="FontAttributes" Value="Italic, Bold" />
+                        </DataTrigger>
+                    </Label.Triggers>
+                </Label>
+            </HorizontalStackLayout>
+            <Label Grid.Column="1" Text="{Binding StatusText}" FontSize="14" VerticalTextAlignment="End" HorizontalOptions="EndAndExpand" HorizontalTextAlignment="End" />
+        </Grid>
+        
 
         <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="20,0,20,20">
             <Editor x:Name="MessageEditor" Placeholder="Enter your message" MinimumHeightRequest="120" AutoSize="TextChanges" HorizontalOptions="FillAndExpand" Margin="0,0,8,0">
@@ -91,7 +96,18 @@
                     </DataTrigger>
                 </Entry.Triggers>
             </Entry>
-            <Button Text=">" Clicked="SendButton_Clicked"/>
+            <Button Text=">" Clicked="SendButton_Clicked">
+                <Button.Style>
+                    <Style TargetType="Button">
+                        <Setter Property="IsEnabled" Value="False" />
+                        <Style.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding Status}" Value="{x:Static local:StatusEnum.Connected}">
+                                <Setter Property="IsEnabled" Value="True" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
         </StackLayout>
     </Grid>
 </ContentPage>
