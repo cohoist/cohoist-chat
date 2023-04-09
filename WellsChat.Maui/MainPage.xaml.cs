@@ -14,7 +14,7 @@ using Application = Microsoft.Maui.Controls.Application;
 
 namespace WellsChat.Maui
 {
-    public enum StatusEnum{ Connecting, Connected, Reconnecting, Disconnected, Error }
+    public enum StatusEnum{ Connecting, Connected, Reconnecting, Disconnected }
     public partial class ChatViewModel : INotifyPropertyChanged
     {
         public ObservableCollection<Message> Messages { get; init; }
@@ -74,7 +74,7 @@ namespace WellsChat.Maui
                 }
                 else
                 {
-                    SetStatus(StatusEnum.Error, "Error connecting to server.");
+                    SetStatus(StatusEnum.Disconnected, "Error connecting to server.");
                 }
             });
         }
@@ -103,9 +103,23 @@ namespace WellsChat.Maui
                 }                
             }
         }
+
         private async void SendButton_Clicked(object sender, EventArgs e)
         {
             await SendMessage();                     
+        }
+        private async void ReconnectButton_Clicked(object sender, EventArgs e)
+        {
+            if (hubConnection.State != HubConnectionState.Disconnected) return;
+            SetStatus(StatusEnum.Connecting, "Connecting...");
+            if (await EstablishConnection())
+            {
+                SetStatus(StatusEnum.Connected, "Connected");
+            }
+            else
+            {
+                SetStatus(StatusEnum.Disconnected, "Error connecting to server.");
+            }
         }
 
         private static async Task RegisterCache()
@@ -176,7 +190,7 @@ namespace WellsChat.Maui
                 }
                 catch (MsalServiceException e)
                 {
-                    SetStatus(StatusEnum.Error, "Not authorized");
+                    SetStatus(StatusEnum.Disconnected, "Not authorized");
                     result = null;
                 }
             }

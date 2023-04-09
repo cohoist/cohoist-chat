@@ -11,8 +11,9 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" AutoFitMode="Height" Margin="20" >
+        <sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" AutoFitMode="Height" Margin="20,0" >
             <sf:SfListView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -55,7 +56,21 @@
                 </DataTemplate>
             </sf:SfListView.ItemTemplate>
         </sf:SfListView>
-        <Grid Grid.Row="1" Margin="20,0">
+        <Button Grid.Row="1" Text="Reconnect" Clicked="ReconnectButton_Clicked" Margin="20,-40,20,0"  HorizontalOptions="End" >
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="IsVisible" Value="False" />
+                    <Setter Property="IsEnabled" Value="False" />
+                    <Style.Triggers>
+                        <DataTrigger TargetType="Button" Binding="{Binding Status}" Value="{x:Static local:StatusEnum.Disconnected}">
+                            <Setter Property="IsEnabled" Value="True" />
+                            <Setter Property="IsVisible" Value="True" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
+        </Button>
+        <Grid Grid.Row="2" Margin="20,-10,20,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -70,11 +85,9 @@
                     </Label.Triggers>
                 </Label>
             </HorizontalStackLayout>
-            <Label Grid.Column="1" Text="{Binding StatusText}" FontSize="14" VerticalTextAlignment="End" HorizontalOptions="EndAndExpand" HorizontalTextAlignment="End" />
+            <Label Grid.Column="1" Text="{Binding StatusText}" FontSize="14" VerticalOptions="End" HorizontalTextAlignment="End" LineBreakMode="WordWrap" />
         </Grid>
-        
-
-        <StackLayout Grid.Row="2" Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="20,0,20,20">
+        <StackLayout Grid.Row="3" Orientation="Horizontal" HorizontalOptions="FillAndExpand" Margin="20,0,20,20">
             <Editor x:Name="MessageEditor" Placeholder="Enter your message" MinimumHeightRequest="120" AutoSize="TextChanges" HorizontalOptions="FillAndExpand" Margin="0,0,8,0">
                 <Editor.Triggers>
                     <DataTrigger TargetType="Editor" Binding="{Binding Source={x:Reference checkBox}, Path=IsChecked}" Value="true">
