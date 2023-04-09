@@ -1,14 +1,9 @@
-﻿using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
-using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
-using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Identity.Client;
 using Microsoft.Identity.Client.Extensions.Msal;
-using Syncfusion.Maui.ListView;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using WellsChat.Maui.Services;
 using WellsChat.Shared;
 using Application = Microsoft.Maui.Controls.Application;
 
@@ -42,22 +37,21 @@ namespace WellsChat.Maui
         private Command EntryReturnCommand { get; init; }
         static string _accessToken = string.Empty;
         static IPublicClientApplication app = null;
-        static SecretClient secretClient = null;
         static Aes256Cipher cipher = null;
         static User me = null;
         private readonly ChatViewModel vm = new();
-        public MainPage(IConfiguration config)
+        private DataService _dataService;
+        public MainPage(DataService dataService)
         {
+            _dataService = dataService;
             InitializeComponent();
             BindingContext = vm;            
             EntryReturnCommand = new Command(async () => await SendMessage());
             MessageEntry.ReturnCommand = EntryReturnCommand;
 
-            var credentials = new DefaultAzureCredential(true); //managed identity credentials don't work on mobile            
-            secretClient = new SecretClient(new Uri(config.GetValue<string>("VaultUri")), credentials);
             try
             {
-                cipher = new Aes256Cipher(Convert.FromBase64String(secretClient.GetSecret("Key").Value.Value));
+                cipher = new Aes256Cipher(Convert.FromBase64String(Task.Run(async () => await _dataService.GetSecretAsync("Key")).Result));
             }
             catch
             {
@@ -65,9 +59,10 @@ namespace WellsChat.Maui
             }
             app = BuildApp();
             if (app == null) return;
+            SetStatus(StatusEnum.Connecting, "Connecting...");
             Task.Run(async () =>
             {
-                await RegisterCache();
+                await RegisterCache();                
                 if (await EstablishConnection())
                 {
                     SetStatus(StatusEnum.Connected, "Connected");
@@ -124,6 +119,9 @@ namespace WellsChat.Maui
 
         private static async Task RegisterCache()
         {
+#if ANDROID
+#elif IOS
+#else
             var storageProperties = new StorageCreationPropertiesBuilder(CacheSettings.CacheFileName, CacheSettings.CacheDir)
                 .WithLinuxKeyring(
                     CacheSettings.LinuxKeyRingSchema,
@@ -135,32 +133,32 @@ namespace WellsChat.Maui
                     CacheSettings.KeyChainServiceName,
                     CacheSettings.KeyChainAccountName)
                 .Build();
-
             var cacheHelper = await MsalCacheHelper.CreateAsync(storageProperties);
             cacheHelper.RegisterCache(app.UserTokenCache);
+#endif            
         }
 
-        private static IPublicClientApplication BuildApp()
+        private IPublicClientApplication BuildApp()
         {
 #if ANDROID
-            return PublicClientApplicationBuilder.Create(secretClient.GetSecret("ClientId").Value.Value)
-                .WithDefaultRedirectUri()
+            return PublicClientApplicationBuilder.Create(Task.Run(async () => await _dataService.GetSecretAsync("ClientId")).Result)
+                .WithRedirectUri($"msal{Task.Run(async () => await _dataService.GetSecretAsync("ClientId")).Result}://auth")
                 .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
-                .WithTenantId(secretClient.GetSecret("TenantId").Value.Value)
+                .WithTenantId(Task.Run(async () => await _dataService.GetSecretAsync("TenantId")).Result)
                 .WithParentActivityOrWindow(() => Platform.CurrentActivity)
                 .Build();
 #elif IOS
-            return PublicClientApplicationBuilder.Create(secretClient.GetSecret("ClientId").Value.Value)
-                .WithDefaultRedirectUri()
+            return PublicClientApplicationBuilder.Create(Task.Run(async () => await _dataService.GetSecretAsync("ClientId")).Result)
+                .WithRedirectUri($"msal{Task.Run(async () => await _dataService.GetSecretAsync("ClientId")).Result}://auth")
                 .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
                 .WithIosKeychainSecurityGroup("com.microsoft.adalcache")
-                .WithTenantId(secretClient.GetSecret("TenantId").Value.Value)
+                .WithTenantId(Task.Run(async () => await _dataService.GetSecretAsync("TenantId")).Result)
                 .Build();
 #else
-            return PublicClientApplicationBuilder.Create(secretClient.GetSecret("ClientId").Value.Value)
+            return PublicClientApplicationBuilder.Create(Task.Run(async () => await _dataService.GetSecretAsync("ClientId")).Result)
                 .WithRedirectUri("https://login.microsoftonline.com/common/oauth2/nativeclient")
                 .WithAuthority(AadAuthorityAudience.AzureAdMyOrg)
-                .WithTenantId(secretClient.GetSecret("TenantId").Value.Value)
+                .WithTenantId(Task.Run(async () => await _dataService.GetSecretAsync("TenantId")).Result)
                 .Build();
 #endif
         }
@@ -175,7 +173,7 @@ namespace WellsChat.Maui
 
             AuthenticationResult result;
             var account = await app.GetAccountsAsync();
-            var scopes = new string[] { secretClient.GetSecret("ApiScope").Value.Value };
+            var scopes = new string[] { Task.Run(async () => await _dataService.GetSecretAsync("ApiScope")).Result };
 
             try
             {
@@ -207,7 +205,7 @@ namespace WellsChat.Maui
 
 
                 hubConnection = new HubConnectionBuilder()
-                    .WithUrl(secretClient.GetSecret("HubUrl").Value.Value, options =>
+                    .WithUrl(Task.Run(async () => await _dataService.GetSecretAsync("HubUrl")).Result, options =>
                     {
                         options.AccessTokenProvider = () => Task.FromResult(_accessToken);
                     })
