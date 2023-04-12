@@ -365,3 +365,4 @@ FodyWeavers.xsd
 /WellsChat.ClientConsole/secrets.json
 /WellsChat.ClientConsole/appsettings.json
 /WellsChat.Maui/appsettings.json
+/WellsChat.Maui/myapp.keystore

@@ -33,14 +33,14 @@ namespace WellsChat.Maui
 
     public partial class MainPage : ContentPage
     {
-        static HubConnection hubConnection = null;
+        private HubConnection hubConnection = null;
         private Command EntryReturnCommand { get; init; }
-        static string _accessToken = string.Empty;
-        static IPublicClientApplication app = null;
-        static Aes256Cipher cipher = null;
-        static User me = null;
+        private string _accessToken = string.Empty;
+        private readonly IPublicClientApplication app = null;
+        private readonly Aes256Cipher cipher = null;
+        private User me = null;
         private readonly ChatViewModel vm = new();
-        private DataService _dataService;
+        private readonly DataService _dataService;
         public MainPage(DataService dataService)
         {
             _dataService = dataService;
@@ -117,7 +117,7 @@ namespace WellsChat.Maui
             }
         }
 
-        private static async Task RegisterCache()
+        private async Task RegisterCache()
         {
 #if ANDROID
 #elif IOS
