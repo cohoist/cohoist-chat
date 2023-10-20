@@ -43,7 +43,7 @@
                                 </DataTrigger>
                             </VerticalStackLayout.Triggers>
                             <Label Text="{Binding SenderDisplayName, StringFormat='{0}:'}" Margin="8,0" HorizontalOptions="End" FontAttributes="Bold"/>
-                            <Label BindingContext="{x:Static sys:DateTime.Now}" Text="{Binding StringFormat='{0:g}'}" Margin="8,0" HorizontalOptions="End" FontSize="12"/>
+                            <Label BindingContext="{Binding Source={x:Static sys:DateTime.Now}, Mode=OneWay}" Text="{Binding StringFormat='{0:g}', Mode=OneWay}" Margin="8,0" HorizontalOptions="End" FontSize="12"/>
                         </VerticalStackLayout>
                         <Label Grid.Column="1" Text="{Binding Payload}" Margin="8,0" VerticalTextAlignment="Center" LineBreakMode="WordWrap">
                             <FlyoutBase.ContextFlyout>

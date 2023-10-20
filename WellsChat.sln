@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WellsChat.Shared", "WellsCh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WellsChat.Maui", "WellsChat.Maui\WellsChat.Maui.csproj", "{57DDE1A6-BCC0-4C4E-BAC1-3C38FDA0CCE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WellsChat.Wpf", "WellsChat.Wpf\WellsChat.Wpf.csproj", "{C932E7E6-367C-4791-9E14-30A0989CEAE3}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WellsChat.Functions", "WellsChat.Functions\WellsChat.Functions.csproj", "{C83DB271-8FC8-44B3-BEE7-64F9AA4B3391}"
 EndProject
 Global
