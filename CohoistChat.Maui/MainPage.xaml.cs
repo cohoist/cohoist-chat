@@ -116,6 +116,14 @@ namespace CohoistChat.Maui
                 SetStatus(StatusEnum.Disconnected, "Error connecting to server.");
             }
         }
+        private async void OnUsersToolbarItemClicked(object sender, EventArgs e)
+        {
+            await ListUsers();
+        }
+        private async Task ListUsers()
+        {
+            await hubConnection.SendAsync("SendMessage", new Message() { Payload = "!users" });
+        }
 
         private async Task RegisterCache()
         {
@@ -285,11 +293,12 @@ namespace CohoistChat.Maui
 
             hubConnection.On<List<User>>("ListUsers", (users) =>
             {
+                var onlineText = users.Count == 1 ? "user online" : "users online";
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
                     MessageType = MessageTypeEnum.Info,
-                    Payload = $"{users.Count} users online"
+                    Payload = $"{users.Count} {onlineText}"
                 };
                 foreach (var user in users)
                 {

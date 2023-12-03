@@ -233,8 +233,9 @@ namespace CohoistChat.Clientconsole
 
             hubConnection.On<List<User>>("ListUsers", (users) =>
             {
+                var onlineText = users.Count == 1 ? "user online" : "users online";
                 Console.SetCursorPosition(0, Console.CursorTop);
-                Console.WriteLine($"{users.Count} users online");
+                Console.WriteLine($"{users.Count} {onlineText}");
                 foreach (var user in users)
                 {
                     Console.WriteLine($"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}]");

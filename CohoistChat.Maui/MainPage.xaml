@@ -6,7 +6,10 @@
              xmlns:sys="clr-namespace:System;assembly=netstandard"
              xmlns:sf="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
              x:Class="CohoistChat.Maui.MainPage">
-    <Grid>
+	<ContentPage.ToolbarItems>
+		<ToolbarItem Text="Users" Clicked="OnUsersToolbarItemClicked"/>
+	</ContentPage.ToolbarItems>
+	<Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
