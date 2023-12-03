@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32901.215
@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CohoistChat.Shared", "Cohoi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CohoistChat.Maui", "CohoistChat.Maui\CohoistChat.Maui.csproj", "{57DDE1A6-BCC0-4C4E-BAC1-3C38FDA0CCE1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CohoistChat.Functions", "CohoistChat.Functions\CohoistChat.Functions.csproj", "{C83DB271-8FC8-44B3-BEE7-64F9AA4B3391}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CohoistChat.Functions", "CohoistChat.Functions\CohoistChat.Functions.csproj", "{C83DB271-8FC8-44B3-BEE7-64F9AA4B3391}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
