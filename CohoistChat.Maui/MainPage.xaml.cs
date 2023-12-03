@@ -15,6 +15,7 @@ namespace CohoistChat.Maui
         public ObservableCollection<Message> Messages { get; init; }
         private StatusEnum _status;
         private string _statusText;
+        public bool _isPrivate = false;
         public StatusEnum Status { get => _status; set { _status = value; OnPropertyChanged(nameof(Status)); } }
         public string StatusText { get => _statusText; set { _statusText = value; OnPropertyChanged(nameof(StatusText)); } }
         public Command<string> CopyCommand { get; init; }
@@ -41,6 +42,9 @@ namespace CohoistChat.Maui
         private User me = null;
         private readonly ChatViewModel vm = new();
         private readonly DataService _dataService;
+
+        private readonly string[] _commands = new string[] { "!users" };
+
         public MainPage(DataService dataService)
         {
             _dataService = dataService;
@@ -79,7 +83,7 @@ namespace CohoistChat.Maui
             if (vm.Status == StatusEnum.Connected && (!string.IsNullOrWhiteSpace(MessageEntry.Text) || !string.IsNullOrWhiteSpace(MessageEditor.Text)))
             {
                 Message message = new() { Payload = (checkBox.IsChecked ? MessageEditor.Text : MessageEntry.Text) };
-                if (message.Payload.ToLower() != "!users") //do not encrypt command messages
+                if (!_commands.Contains(message.Payload.ToLower())) //do not encrypt command messages
                 {
                     message.SenderEmail = me.Email;
                     message.SenderDisplayName = me.DisplayName;
@@ -119,6 +123,37 @@ namespace CohoistChat.Maui
         private async void OnUsersToolbarItemClicked(object sender, EventArgs e)
         {
             await ListUsers();
+        }
+        private async void OnPrivateToolbarItemClicked(object sender, EventArgs e)
+        {
+            await HideMessages();
+        }
+        private async void OnClearToolbarItemClicked(object sender, EventArgs e)
+        {
+            await ClearMessages();
+        }
+        private async Task HideMessages(bool overrideStatus = false, bool isPrivate = false)
+        {
+            if (overrideStatus)
+            {
+                vm._isPrivate = isPrivate;
+            }
+            else
+            {
+                vm._isPrivate = !vm._isPrivate;
+            }
+            ToolbarItems.Where(x => x.AutomationId == "Private").FirstOrDefault().Text = vm._isPrivate ? "☑ Lock" : "Lock";
+            var privateMessageList = new ObservableCollection<Message>() {
+                new Message() { Payload = "Welcome to Cohoist Chat.", MessageType=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
+                new Message() { Payload = "This is a private chat application where you can send secure messages.", MessageType=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
+                new Message() { Payload = "You have no new messages.", MessageType=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
+            };
+            MessagesList.ItemsSource = vm._isPrivate ? privateMessageList : vm.Messages;
+        }
+
+        private async Task ClearMessages()
+        {
+            vm.Messages.Clear();
         }
         private async Task ListUsers()
         {

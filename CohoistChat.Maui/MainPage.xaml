@@ -7,6 +7,8 @@
              xmlns:sf="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
              x:Class="CohoistChat.Maui.MainPage">
 	<ContentPage.ToolbarItems>
+		<ToolbarItem Text="Lock" Clicked="OnPrivateToolbarItemClicked" AutomationId="Private" />
+		<ToolbarItem Text="Clear" Clicked="OnClearToolbarItemClicked" AutomationId="Clear" />
 		<ToolbarItem Text="Users" Clicked="OnUsersToolbarItemClicked"/>
 	</ContentPage.ToolbarItems>
 	<Grid>
@@ -16,7 +18,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" AutoFitMode="Height" Margin="20,0" >
+		<sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" AutoFitMode="Height" Margin="20,0" >
             <sf:SfListView.ItemTemplate>
                 <DataTemplate>
                     <Grid>
@@ -51,8 +53,12 @@
                         <Label Grid.Column="1" Text="{Binding Payload}" Margin="8,0" VerticalTextAlignment="Center" LineBreakMode="WordWrap">
                             <FlyoutBase.ContextFlyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand, Source={local:ChatViewModel}}" CommandParameter="{Binding Payload}"/>
-                                </MenuFlyout>
+									<MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand, Source={local:ChatViewModel}}" CommandParameter="{Binding Payload}">
+										<MenuFlyoutItem.KeyboardAccelerators>
+											<KeyboardAccelerator Modifiers="Ctrl" Key="C" />
+										</MenuFlyoutItem.KeyboardAccelerators>
+									</MenuFlyoutItem>
+								</MenuFlyout>
                             </FlyoutBase.ContextFlyout>
                         </Label>
                     </Grid>
