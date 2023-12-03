@@ -1,0 +1,136 @@
+﻿<html>
+	<head>
+		<style>
+			/* For Loading Animation*/
+
+			.loading-wrapper {
+				display: flex;
+				justify-content: space-around;
+				align-items: center;
+				height: 100%;
+				width: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+
+			.circle {
+				background-color: #00608f;
+				border-radius: 50%;
+				height: 20px; /* Adjusted size */
+				width: 20px; /* Adjusted size */
+				position: absolute;
+				transform: translateY(-50%);
+				box-shadow: 0 0 0 2px white, 0 0 0 6px #00608f;
+			}
+
+				.circle:nth-child(1) {
+					left: calc(50% - 60px); /* Adjusted position */
+					top: calc(50% + 30px); /* Adjusted position */
+				}
+
+				.circle:nth-child(2) {
+					left: calc(50% - 20px); /* Adjusted position */
+					top: calc(50% - 30px); /* Adjusted position */
+				}
+
+				.circle:nth-child(3) {
+					left: calc(50% + 20px); /* Adjusted position */
+					top: calc(50% + 30px); /* Adjusted position */
+				}
+
+				.circle:nth-child(4) {
+					left: calc(50% + 60px); /* Adjusted position */
+					top: calc(50% - 30px); /* Adjusted position */
+				}
+
+			@keyframes pulley1and3 {
+				0%, 100% {
+					transform: translateY(-50%);
+				}
+
+				50% {
+					transform: translateY(calc(-50% - 60px));
+				}
+			}
+
+			@keyframes pulley2and4 {
+				0%, 100% {
+					transform: translateY(-50%);
+				}
+
+				50% {
+					transform: translateY(calc(-50% + 60px));
+				}
+			}
+
+			@media (min-width: 768px) {
+				.circle {
+					background-color: #00608f;
+					border-radius: 50%;
+					height: 50px;
+					width: 50px;
+					position: absolute;
+					transform: translateY(-50%);
+					box-shadow: 0 0 0 5px white, 0 0 0 15px #00608f;
+				}
+
+					.circle:nth-child(1) {
+						left: calc(50% - 150px);
+						top: calc(50% + 75px);
+					}
+
+					.circle:nth-child(2) {
+						left: calc(50% - 50px);
+						top: calc(50% - 75px);
+					}
+
+					.circle:nth-child(3) {
+						left: calc(50% + 50px);
+						top: calc(50% + 75px);
+					}
+
+					.circle:nth-child(4) {
+						left: calc(50% + 150px);
+						top: calc(50% - 75px);
+					}
+
+				@keyframes pulley1and3 {
+					0%, 100% {
+						transform: translateY(-50%);
+					}
+
+					50% {
+						transform: translateY(calc(-50% - 150px));
+					}
+				}
+
+				@keyframes pulley2and4 {
+					0%, 100% {
+						transform: translateY(-50%);
+					}
+
+					50% {
+						transform: translateY(calc(-50% + 150px));
+					}
+				}
+			}
+
+			.circle:nth-child(1), .circle:nth-child(3) {
+				animation: pulley1and3 2s infinite;
+			}
+
+			.circle:nth-child(2), .circle:nth-child(4) {
+				animation: pulley2and4 2s infinite;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="loading-wrapper">
+			<div class="circle"></div>
+			<div class="circle"></div>
+			<div class="circle"></div>
+			<div class="circle"></div>
+		</div>
+	</body>
+</html>

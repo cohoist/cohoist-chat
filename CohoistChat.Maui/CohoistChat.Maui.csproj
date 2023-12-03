@@ -46,6 +46,9 @@
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
   <ItemGroup>
+	  <MauiAsset  Include="Resources\Raw\loading.html" LogicalName="%(RecursiveDir)%(Filename)%(Extension)"/>
+  </ItemGroup>
+  <ItemGroup>
     <EmbeddedResource Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>

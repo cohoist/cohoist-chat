@@ -7,17 +7,24 @@
              xmlns:sf="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
              x:Class="CohoistChat.Maui.MainPage">
 	<ContentPage.ToolbarItems>
-		<ToolbarItem Text="Lock" Clicked="OnPrivateToolbarItemClicked" AutomationId="Private" />
-		<ToolbarItem Text="Clear" Clicked="OnClearToolbarItemClicked" AutomationId="Clear" />
-		<ToolbarItem Text="Users" Clicked="OnUsersToolbarItemClicked"/>
+		<ToolbarItem Text="Lock" Clicked="OnPrivateClicked" AutomationId="Private" />
+		<ToolbarItem Text="Clear" Clicked="OnClearClicked" AutomationId="Clear" />
+		<ToolbarItem Text="Users" Clicked="OnUsersClicked"/>
 	</ContentPage.ToolbarItems>
 	<Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+		<WebView Source="loading.html" IsVisible="False">
+			<WebView.Triggers>
+				<DataTrigger TargetType="WebView" Binding="{Binding Status}" Value="{x:Static local:StatusEnum.Connecting}">
+					<Setter Property="IsVisible" Value="True" />
+				</DataTrigger>
+			</WebView.Triggers>
+		</WebView>
 		<sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" AutoFitMode="Height" Margin="20,0" >
             <sf:SfListView.ItemTemplate>
                 <DataTemplate>

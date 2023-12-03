@@ -120,15 +120,15 @@ namespace CohoistChat.Maui
                 SetStatus(StatusEnum.Disconnected, "Error connecting to server.");
             }
         }
-        private async void OnUsersToolbarItemClicked(object sender, EventArgs e)
+        private async void OnUsersClicked(object sender, EventArgs e)
         {
             await ListUsers();
         }
-        private async void OnPrivateToolbarItemClicked(object sender, EventArgs e)
+        private async void OnPrivateClicked(object sender, EventArgs e)
         {
             await HideMessages();
         }
-        private async void OnClearToolbarItemClicked(object sender, EventArgs e)
+        private async void OnClearClicked(object sender, EventArgs e)
         {
             await ClearMessages();
         }
