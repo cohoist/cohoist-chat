@@ -372,6 +372,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
+                    TimeReceived = DateTime.Now.ToString(),
                     Type = MessageTypeEnum.Connected,
                     Payload = $"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}] connected."
                 };
@@ -383,6 +384,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
+                    TimeReceived = DateTime.Now.ToString(),
                     Type = MessageTypeEnum.Disconnected,
                     Payload = $"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}] disconnected."
                 };
@@ -410,6 +412,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
+                    TimeReceived = DateTime.Now.ToString(),
                     Type = MessageTypeEnum.Info,
                     Payload = $"{users.Count} {onlineText}"
                 };
