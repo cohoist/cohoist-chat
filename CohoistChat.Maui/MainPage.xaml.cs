@@ -214,7 +214,7 @@ namespace CohoistChat.Maui
             }
 
             vm._isPrivate = !vm._isPrivate;
-            ToolbarItems.Where(x => x.AutomationId == "Private").FirstOrDefault().Text = vm._isPrivate ? "☑ Lock" : "Lock";
+            ToolbarItems.Where(x => x.AutomationId == "Private").FirstOrDefault().Text = vm._isPrivate ? "🔓" : "🔒";
             var privateMessageList = new ObservableCollection<Message>() {
                 new Message() { Payload = "Welcome to Cohoist Chat.", Type=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
                 new Message() { Payload = "This is a private chat application where you can send secure messages.", Type=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },

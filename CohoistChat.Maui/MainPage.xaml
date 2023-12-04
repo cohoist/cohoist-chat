@@ -11,7 +11,7 @@
         <local:StringToDateTimeConverter x:Key="stringToDateTime" />
     </ContentPage.Resources>
 	<ContentPage.ToolbarItems>
-		<ToolbarItem Text="Lock" Clicked="OnPrivateClicked" AutomationId="Private" />
+		<ToolbarItem Text="🔒" Clicked="OnPrivateClicked" AutomationId="Private" />
 		<ToolbarItem Text="Clear" Clicked="OnClearClicked" AutomationId="Clear" />
 		<ToolbarItem Text="Users" Clicked="OnUsersClicked"/>
 	</ContentPage.ToolbarItems>
