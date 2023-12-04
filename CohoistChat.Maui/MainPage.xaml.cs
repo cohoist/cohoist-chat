@@ -109,6 +109,7 @@ namespace CohoistChat.Maui
                 {
                     message.SenderEmail = me.Email;
                     message.SenderDisplayName = me.DisplayName;
+                    message.TimeSent = DateTime.Now.ToString();
                     message = cipher.EncryptMessage(message);
                 }
 
@@ -215,9 +216,9 @@ namespace CohoistChat.Maui
             vm._isPrivate = !vm._isPrivate;
             ToolbarItems.Where(x => x.AutomationId == "Private").FirstOrDefault().Text = vm._isPrivate ? "☑ Lock" : "Lock";
             var privateMessageList = new ObservableCollection<Message>() {
-                new Message() { Payload = "Welcome to Cohoist Chat.", MessageType=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
-                new Message() { Payload = "This is a private chat application where you can send secure messages.", MessageType=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
-                new Message() { Payload = "You have no new messages.", MessageType=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
+                new Message() { Payload = "Welcome to Cohoist Chat.", Type=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
+                new Message() { Payload = "This is a private chat application where you can send secure messages.", Type=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
+                new Message() { Payload = "You have no new messages.", Type=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
             };
             MessagesList.ItemsSource = vm._isPrivate ? privateMessageList : vm.Messages;
         }
@@ -371,7 +372,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
-                    MessageType = MessageTypeEnum.Connected,
+                    Type = MessageTypeEnum.Connected,
                     Payload = $"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}] connected."
                 };
                 AddMessage(message);
@@ -382,7 +383,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
-                    MessageType = MessageTypeEnum.Disconnected,
+                    Type = MessageTypeEnum.Disconnected,
                     Payload = $"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}] disconnected."
                 };
                 AddMessage(message);
@@ -391,9 +392,10 @@ namespace CohoistChat.Maui
             hubConnection.On<Message>("ReceiveMessage", (message) =>
             {
                 message = cipher.DecryptMessage(message);
+                message.TimeReceived = DateTime.Now.ToString();
                 bool isMe = message.SenderEmail == me.Email;
-                if (isMe) message.MessageType = MessageTypeEnum.Me;
-                else message.MessageType = MessageTypeEnum.NotMe;
+                if (isMe) message.Type = MessageTypeEnum.Me;
+                else message.Type = MessageTypeEnum.NotMe;
                 AddMessage(message);
             });
 
@@ -408,7 +410,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
-                    MessageType = MessageTypeEnum.Info,
+                    Type = MessageTypeEnum.Info,
                     Payload = $"{users.Count} {onlineText}"
                 };
                 foreach (var user in users)

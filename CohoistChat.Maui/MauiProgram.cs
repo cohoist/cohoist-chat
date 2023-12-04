@@ -31,6 +31,7 @@ namespace CohoistChat.Maui
                 platform.OpenUrl((app, url, options) =>
                 {
                     AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(url);
+                    return true;
                 });
             });
 #endif

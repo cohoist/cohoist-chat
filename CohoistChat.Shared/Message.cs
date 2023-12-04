@@ -13,6 +13,8 @@ namespace CohoistChat.Shared
         public string SenderEmail { get; set; }
         public string SenderDisplayName { get; set; }
         public string IV { get; set; }
-        public MessageTypeEnum MessageType { get; set; }
+        public MessageTypeEnum Type { get; set; }
+        public string TimeSent { get; set; }
+        public string TimeReceived { get; set; }
     }
 }

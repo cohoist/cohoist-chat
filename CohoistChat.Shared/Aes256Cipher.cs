@@ -13,6 +13,7 @@ namespace CohoistChat.Shared
 
         private string DecryptString(string text, string iv)
         {
+            if (text is null) return string.Empty;
             using (var aes = Aes.Create())
             {
                 aes.Key = _key;
@@ -38,7 +39,7 @@ namespace CohoistChat.Shared
             message.Payload = DecryptString(message.Payload, message.IV);
             message.SenderEmail = DecryptString(message.SenderEmail, message.IV);
             message.SenderDisplayName = DecryptString(message.SenderDisplayName, message.IV);
-
+            message.TimeSent = DecryptString(message.TimeSent, message.IV);            
             return message;
         }
 
@@ -74,6 +75,7 @@ namespace CohoistChat.Shared
             message.Payload = EncryptString(message.Payload, message.IV);
             message.SenderEmail = EncryptString(message.SenderEmail, message.IV);
             message.SenderDisplayName = EncryptString(message.SenderDisplayName, message.IV);
+            message.TimeSent = EncryptString(message.TimeSent, message.IV);
 
             return message;
         }
