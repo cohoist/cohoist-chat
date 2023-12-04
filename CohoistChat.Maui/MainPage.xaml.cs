@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using CohoistChat.Maui.Services;
 using CohoistChat.Shared;
+using Syncfusion.Maui.Popup;
 using Application = Microsoft.Maui.Controls.Application;
 
 namespace CohoistChat.Maui
@@ -42,7 +43,10 @@ namespace CohoistChat.Maui
         private User me = null;
         private readonly ChatViewModel vm = new();
         private readonly DataService _dataService;
-
+        private SfPopup pwPopup = new SfPopup();
+        private Entry pwEntry = new Entry();
+        private DataTemplate pwTemplate;
+        private string passwordHash = string.Empty;
         private readonly string[] _commands = new string[] { "!users" };
 
         public MainPage(DataService dataService)
@@ -52,7 +56,7 @@ namespace CohoistChat.Maui
             BindingContext = vm;            
             EntryReturnCommand = new Command(async () => await SendMessage());
             MessageEntry.ReturnCommand = EntryReturnCommand;
-
+            ConfigurePopup();
             try
             {
                 cipher = new Aes256Cipher(Convert.FromBase64String(Task.Run(async () => await _dataService.GetSecretAsync("Key")).Result));
@@ -77,7 +81,25 @@ namespace CohoistChat.Maui
                 }
             });
         }
+        private void ConfigurePopup()
+        {
+            pwPopup.ShowFooter = true;
+            pwPopup.AppearanceMode = PopupButtonAppearanceMode.TwoButton;
+            pwPopup.AcceptButtonText = "Submit";
+            pwPopup.DeclineButtonText = "Cancel";
+            pwPopup.AcceptCommand = new Command(async () => { await ToggleMessages(); });
+            pwPopup.DeclineCommand = new Command(async () => { await CancelPopup(); });
 
+            pwTemplate = new DataTemplate(() =>
+            {
+                pwEntry = new Entry();
+                pwEntry.IsPassword = true;
+                pwEntry.Text = string.Empty;
+                pwEntry.Completed += async (sender, e) => { await ToggleMessages(); };
+                return pwEntry;
+            });
+            pwPopup.ContentTemplate = pwTemplate;
+        }
         private async Task SendMessage()
         {
             if (vm.Status == StatusEnum.Connected && (!string.IsNullOrWhiteSpace(MessageEntry.Text) || !string.IsNullOrWhiteSpace(MessageEditor.Text)))
@@ -126,22 +148,71 @@ namespace CohoistChat.Maui
         }
         private async void OnPrivateClicked(object sender, EventArgs e)
         {
-            await HideMessages();
+            if (vm._isPrivate)
+            {
+                pwEntry.Placeholder = "Enter password";
+                pwPopup.HeaderTitle = "Unlock Messages";
+            }
+            else
+            {
+                pwEntry.Placeholder = "Set password";
+                pwPopup.HeaderTitle = "Lock Messages";
+            }
+            pwPopup.Show();
+            pwEntry.Focus();
         }
         private async void OnClearClicked(object sender, EventArgs e)
         {
             await ClearMessages();
         }
-        private async Task HideMessages(bool overrideStatus = false, bool isPrivate = false)
+        private async Task ToggleMessages()
         {
-            if (overrideStatus)
+            if (vm._isPrivate)
             {
-                vm._isPrivate = isPrivate;
+                if (!string.IsNullOrEmpty(pwEntry.Text) && !string.IsNullOrEmpty(passwordHash))
+                {
+                    if (BCrypt.Net.BCrypt.Verify(pwEntry.Text, passwordHash))
+                    {
+                        //Success. Unlock messages
+                        pwEntry.Text = string.Empty;
+                        passwordHash = string.Empty;
+                        pwPopup.IsOpen = false;
+                    }
+                    else
+                    {
+                        //Incorrect password. Cancel
+                        pwEntry.Text = string.Empty;
+                        pwPopup.IsOpen = false;
+                        return;
+                    }
+                }
+                else
+                {
+                    //no password entered. Cancel
+                    pwEntry.Text = string.Empty;
+                    pwPopup.IsOpen = false;
+                    return;
+                }
             }
             else
             {
-                vm._isPrivate = !vm._isPrivate;
+                if (string.IsNullOrEmpty(pwEntry.Text))
+                {
+                    //no password set. Cancel
+                    pwEntry.Text = string.Empty;
+                    pwPopup.IsOpen = false;
+                    return;
+                }
+                else
+                {
+                    //set password to lock messages
+                    passwordHash = BCrypt.Net.BCrypt.HashPassword(pwEntry.Text);
+                    pwEntry.Text = string.Empty;
+                    pwPopup.IsOpen = false;
+                }
             }
+
+            vm._isPrivate = !vm._isPrivate;
             ToolbarItems.Where(x => x.AutomationId == "Private").FirstOrDefault().Text = vm._isPrivate ? "☑ Lock" : "Lock";
             var privateMessageList = new ObservableCollection<Message>() {
                 new Message() { Payload = "Welcome to Cohoist Chat.", MessageType=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
@@ -149,6 +220,11 @@ namespace CohoistChat.Maui
                 new Message() { Payload = "You have no new messages.", MessageType=MessageTypeEnum.Connected, SenderDisplayName="Info", SenderEmail="Redacted" },
             };
             MessagesList.ItemsSource = vm._isPrivate ? privateMessageList : vm.Messages;
+        }
+        private async Task CancelPopup()
+        {
+            pwEntry.Text = string.Empty;
+            pwPopup.IsOpen = false;
         }
 
         private async Task ClearMessages()

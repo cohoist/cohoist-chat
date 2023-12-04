@@ -5,6 +5,7 @@
              xmlns:shared="clr-namespace:CohoistChat.Shared;assembly=CohoistChat.Shared"
              xmlns:sys="clr-namespace:System;assembly=netstandard"
              xmlns:sf="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
+			 xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Popup;assembly=Syncfusion.Maui.Popup"
              x:Class="CohoistChat.Maui.MainPage">
 	<ContentPage.ToolbarItems>
 		<ToolbarItem Text="Lock" Clicked="OnPrivateClicked" AutomationId="Private" />
@@ -25,6 +26,7 @@
 				</DataTrigger>
 			</WebView.Triggers>
 		</WebView>
+		<syncfusion:SfPopup/>
 		<sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" AutoFitMode="Height" Margin="20,0" >
             <sf:SfListView.ItemTemplate>
                 <DataTemplate>
