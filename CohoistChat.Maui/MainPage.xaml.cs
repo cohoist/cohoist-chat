@@ -285,70 +285,92 @@ namespace CohoistChat.Maui
 
         private async Task<bool> EstablishConnection()
         {
+            await StopAndDisposeHubConnection();
+
+            var scopes = new string[] { await _dataService.GetSecretAsync("ApiScope") };
+            var result = await GetAccessToken(scopes);
+
+            if (result != null)
+            {
+                _accessToken = result.AccessToken;
+                me = CreateUserFromResult(result);
+
+                hubConnection = CreateHubConnection(await _dataService.GetSecretAsync("HubUrl"), _accessToken);
+
+                return await StartHubConnection();
+            }
+
+            return false;
+        }
+
+        private async Task StopAndDisposeHubConnection()
+        {
             if (hubConnection != null && hubConnection.State != HubConnectionState.Disconnected)
             {
                 await hubConnection.StopAsync();
                 await hubConnection.DisposeAsync();
             }
+        }
 
-            AuthenticationResult result;
+        private async Task<AuthenticationResult> GetAccessToken(string[] scopes)
+        {
             var account = await app.GetAccountsAsync();
-            var scopes = new string[] { Task.Run(async () => await _dataService.GetSecretAsync("ApiScope")).Result };
 
             try
             {
-                result = await app.AcquireTokenSilent(scopes,
-                    account.FirstOrDefault()).ExecuteAsync();
+                return await app.AcquireTokenSilent(scopes, account.FirstOrDefault()).ExecuteAsync();
             }
             catch (MsalUiRequiredException)
             {
                 try
                 {
-                    result = await app.AcquireTokenInteractive(scopes).ExecuteAsync();
+                    return await app.AcquireTokenInteractive(scopes).ExecuteAsync();
                 }
                 catch (MsalServiceException e)
                 {
                     SetStatus(StatusEnum.Disconnected, "Not authorized");
-                    result = null;
+                    return null;
                 }
             }
+        }
 
+        private User CreateUserFromResult(AuthenticationResult result)
+        {
+            var emailClaim = result.ClaimsPrincipal.FindFirst("preferred_username");
+            var nameClaim = result.ClaimsPrincipal.FindFirst("name");
 
-            if (result != null)
+            return new User()
             {
-                _accessToken = result.AccessToken;
-                me = new User()
+                Email = emailClaim?.Value,
+                DisplayName = nameClaim?.Value
+            };
+        }
+
+        private HubConnection CreateHubConnection(string url, string accessToken)
+        {
+            return new HubConnectionBuilder()
+                .WithUrl(url, options =>
                 {
-                    Email = result.ClaimsPrincipal.FindFirst("preferred_username").Value, //email
-                    DisplayName = result.ClaimsPrincipal.FindFirst("name").Value
-                };
+                    options.AccessTokenProvider = () => Task.FromResult(accessToken);
+                })
+                .WithAutomaticReconnect()
+                .Build();
+        }
 
-
-                hubConnection = new HubConnectionBuilder()
-                    .WithUrl(Task.Run(async () => await _dataService.GetSecretAsync("HubUrl")).Result, options =>
-                    {
-                        options.AccessTokenProvider = () => Task.FromResult(_accessToken);
-                    })
-                    .WithAutomaticReconnect()
-                    .Build();
-
-
-                try
-                {
-                    AddHandlers();
-                    await hubConnection.StartAsync();
-                    return true;
-                }
-                catch (HttpRequestException e)
-                {
-                    return false;
-                }
+        private async Task<bool> StartHubConnection()
+        {
+            try
+            {
+                AddHandlers();
+                await hubConnection.StartAsync();
+                return true;
             }
-            else
+            catch (HttpRequestException e)
             {
                 return false;
             }
         }
+
         private void SetStatus(StatusEnum status, string statustTest)
         {
             Application.Current.Dispatcher.Dispatch(() =>
