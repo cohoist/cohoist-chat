@@ -501,8 +501,6 @@ namespace CohoistChat.Maui
             }
             //Failed 5 reconnection attempts
             SetStatus(StatusEnum.Disconnected, "Disconnected");
-            //TODO: Add reconnect button if status disconnected
-            Console.WriteLine($" Enter !reconnect to try again.");
             return;
         }
         private async void CopyFromMenuAsync(object sender, EventArgs e)

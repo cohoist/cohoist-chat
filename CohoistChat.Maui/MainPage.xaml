@@ -22,12 +22,12 @@
 			<RowDefinition Height="Auto"/>
 			<RowDefinition Height="Auto"/>
 		</Grid.RowDefinitions>
-		<WebView Source="loading.html" IsVisible="False">
+        <WebView Source="loading.html" IsVisible="False" ZIndex="999">
 			<WebView.Triggers>
-				<DataTrigger TargetType="WebView" Binding="{Binding Status}" Value="{x:Static local:StatusEnum.Connecting}">
+                <DataTrigger TargetType="WebView" Binding="{Binding Status}" Value="{x:Static local:StatusEnum.Connecting}">
                     <Setter Property="IsVisible" Value="True" />
                 </DataTrigger>
-			</WebView.Triggers>
+            </WebView.Triggers>
 		</WebView>
 		<syncfusion:SfPopup/>
 		<sf:SfListView Grid.Row="0" x:Name="MessagesList" ItemsSource="{Binding Messages}" AutoFitMode="Height" Margin="20,0" >

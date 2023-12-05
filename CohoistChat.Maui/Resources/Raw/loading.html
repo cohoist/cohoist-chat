@@ -1,6 +1,9 @@
 ﻿<html>
 	<head>
 		<style>
+            body {
+                background-color: var(--background-color); /* Set in JS based on system theme */
+            }
 			/* For Loading Animation*/
 
 			.loading-wrapper {
@@ -14,15 +17,15 @@
 				left: 0;
 			}
 
-			.circle {
-				background-color: #00608f;
-				border-radius: 50%;
-				height: 20px; /* Adjusted size */
-				width: 20px; /* Adjusted size */
-				position: absolute;
-				transform: translateY(-50%);
-				box-shadow: 0 0 0 2px white, 0 0 0 6px #00608f;
-			}
+            .circle {
+                background-color: var(--foreground-color);
+                border-radius: 50%;
+                height: 20px; /* Adjusted size */
+                width: 20px; /* Adjusted size */
+                position: absolute;
+                transform: translateY(-50%);
+                box-shadow: 0 0 0 2px var(--background-color), 0 0 0 6px var(--foreground-color);
+            }
 
 				.circle:nth-child(1) {
 					left: calc(50% - 60px); /* Adjusted position */
@@ -65,15 +68,15 @@
 			}
 
 			@media (min-width: 768px) {
-				.circle {
-					background-color: #00608f;
-					border-radius: 50%;
-					height: 50px;
-					width: 50px;
-					position: absolute;
-					transform: translateY(-50%);
-					box-shadow: 0 0 0 5px white, 0 0 0 15px #00608f;
-				}
+                .circle {
+                    background-color: var(--foreground-color);
+                    border-radius: 50%;
+                    height: 50px;
+                    width: 50px;
+                    position: absolute;
+                    transform: translateY(-50%);
+                    box-shadow: 0 0 0 5px var(--background-color), 0 0 0 15px var(--foreground-color);
+                }
 
 					.circle:nth-child(1) {
 						left: calc(50% - 150px);
@@ -124,6 +127,25 @@
 				animation: pulley2and4 2s infinite;
 			}
 		</style>
+		<script>
+			// Define function to set bg and fg colors based on system theme
+			function setBackgroundColor() {
+				var backgroundColor;
+				var foregroundColor;
+                if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+					backgroundColor = '#00608f'; 
+					foregroundColor = '#ffffff'; 
+				} else {
+                    backgroundColor = '#ffffff';
+                    foregroundColor = '#00608f'; 
+				}
+                // Assign the colors to CSS variables
+				document.documentElement.style.setProperty('--background-color', backgroundColor);
+                document.documentElement.style.setProperty('--foreground-color', foregroundColor);
+			}
+			// Call the function on page load
+			window.onload = setBackgroundColor;
+		</script>
 	</head>
 	<body>
 		<div class="loading-wrapper">
