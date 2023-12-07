@@ -516,5 +516,17 @@ namespace CohoistChat.Maui
             await toast.Show(cancellationTokenSource.Token);
             */
         }
+        private void DeleteMessage(object sender, EventArgs e)
+        {
+            //delete individual message based on swipe gesture
+            var deleteImage = sender as Image;
+            if (deleteImage == null) return;
+            var item = deleteImage?.BindingContext as Message;
+            var itemIndex = vm.Messages.IndexOf(item);
+            if (itemIndex >= 0)
+                vm.Messages.RemoveAt(itemIndex);
+            //reset swipe
+            MessagesList.ResetSwipeItem();
+        }
     }
 }
