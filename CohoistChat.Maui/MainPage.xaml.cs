@@ -6,6 +6,7 @@ using System.ComponentModel;
 using CohoistChat.Maui.Services;
 using CohoistChat.Shared;
 using Syncfusion.Maui.Popup;
+using System.Text.RegularExpressions;
 using Application = Microsoft.Maui.Controls.Application;
 
 namespace CohoistChat.Maui
@@ -20,10 +21,17 @@ namespace CohoistChat.Maui
         public StatusEnum Status { get => _status; set { _status = value; OnPropertyChanged(nameof(Status)); } }
         public string StatusText { get => _statusText; set { _statusText = value; OnPropertyChanged(nameof(StatusText)); } }
         public Command<string> CopyCommand { get; init; }
+        public Command<string> CopyUrlCommand { get; init; }
         public ChatViewModel()
         {
             Messages = new ObservableCollection<Message>();
             CopyCommand = new Command<string>(async (string text) => await Clipboard.Default.SetTextAsync(text));
+            CopyUrlCommand = new Command<string>(async (string text) =>
+            {
+                string url = Regex.Match(text, @"(https?://[^\s]+)").Value;
+                if (string.IsNullOrEmpty(url)) return;
+                await Clipboard.Default.SetTextAsync(url);
+            });
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

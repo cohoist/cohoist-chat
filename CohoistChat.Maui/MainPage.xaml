@@ -94,6 +94,11 @@
 											<KeyboardAccelerator Modifiers="Ctrl" Key="C" />
 										</MenuFlyoutItem.KeyboardAccelerators>
 									</MenuFlyoutItem>
+									<MenuFlyoutItem Text="Copy URL" Command="{Binding CopyUrlCommand, Source={local:ChatViewModel}}" CommandParameter="{Binding Payload}">
+										<MenuFlyoutItem.KeyboardAccelerators>
+											<KeyboardAccelerator Modifiers="Ctrl,Shift" Key="C" />
+										</MenuFlyoutItem.KeyboardAccelerators>
+									</MenuFlyoutItem>
 								</MenuFlyout>
 							</FlyoutBase.ContextFlyout>
 						</Label>
