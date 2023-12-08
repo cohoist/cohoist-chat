@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace CohoistChat.Shared
@@ -37,6 +38,15 @@ namespace CohoistChat.Shared
         public MessageTypeEnum Type { get; set; }
         public DateTime TimeSent { get; set; }
         public DateTime TimeReceived { get; set; }
-        public bool ContainsUrl { get; set; }
+        public bool ContainsUrl
+        {
+            get
+            {
+                string url = Regex.Match(Payload, @"(https?://[^\s]+)").Value;
+                return !string.IsNullOrEmpty(url);
+            }
+        }
+        //ContainsImage
+        //ContainsFile
     }
 }

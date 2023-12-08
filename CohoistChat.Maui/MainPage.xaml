@@ -91,12 +91,12 @@
 							</Label.Triggers>
 							<FlyoutBase.ContextFlyout>
 								<MenuFlyout>
-									<MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand, Source={local:ChatViewModel}}" CommandParameter="{Binding Payload}">
-										<MenuFlyoutItem.KeyboardAccelerators>
+                                    <MenuFlyoutItem Text="Copy" Command="{Binding CopyCommand, Source={local:ChatViewModel}}" CommandParameter="{Binding Payload}">
+                                        <MenuFlyoutItem.KeyboardAccelerators>
 											<KeyboardAccelerator Modifiers="Ctrl" Key="C" />
 										</MenuFlyoutItem.KeyboardAccelerators>
 									</MenuFlyoutItem>
-									<MenuFlyoutItem Text="Copy URL" Command="{Binding CopyUrlCommand, Source={local:ChatViewModel}}" CommandParameter="{Binding Payload}">
+                                    <MenuFlyoutItem Text="Copy URL" Command="{Binding CopyUrlCommand, Source={local:ChatViewModel}}" CommandParameter="{Binding Payload}" IsEnabled="{Binding ContainsUrl}">
 										<MenuFlyoutItem.KeyboardAccelerators>
 											<KeyboardAccelerator Modifiers="Ctrl,Shift" Key="C" />
 										</MenuFlyoutItem.KeyboardAccelerators>
