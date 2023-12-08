@@ -17,18 +17,18 @@ namespace CohoistChat.Server.Hubs
         {
             _appData = appData;
         }
-        public async Task SendMessage(Message message)
+        public async Task SendMessage(MessageDto messageDto)
         {
-            if (!string.IsNullOrWhiteSpace(message.Payload))
+            if (!string.IsNullOrWhiteSpace(messageDto.Payload))
             {
-                switch (message.Payload.ToLower())
+                switch (messageDto.Payload.ToLower())
                 {
                     case "!users":
                         await Clients.Caller.SendAsync("ListUsers", _appData.MemoryCache.Get<List<User>>(ACTIVE_USERS));
                         break;
                     default:
-                        await Clients.Caller.SendAsync("SendSuccess", message);
-                        await Clients.All.SendAsync("ReceiveMessage", message);                        
+                        await Clients.Caller.SendAsync("SendSuccess", messageDto);
+                        await Clients.All.SendAsync("ReceiveMessage", messageDto);                        
                         break;
                 }
             }

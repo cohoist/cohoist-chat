@@ -112,18 +112,21 @@ namespace CohoistChat.Maui
         {
             if (vm.Status == StatusEnum.Connected && (!string.IsNullOrWhiteSpace(MessageEntry.Text) || !string.IsNullOrWhiteSpace(MessageEditor.Text)))
             {
-                Message message = new() { Payload = (checkBox.IsChecked ? MessageEditor.Text : MessageEntry.Text) };
-                if (!_commands.Contains(message.Payload.ToLower())) //do not encrypt command messages
+                MessageDto messageDto = new() { 
+                    Payload = (checkBox.IsChecked ? MessageEditor.Text : MessageEntry.Text),
+                    SenderEmail = me.Email,
+                    SenderDisplayName = me.DisplayName,
+                    TimeSent = DateTime.Now.ToString()
+                };
+                if (!_commands.Contains(messageDto.Payload.ToLower())) //do not encrypt command messages
                 {
-                    message.SenderEmail = me.Email;
-                    message.SenderDisplayName = me.DisplayName;
-                    message.TimeSent = DateTime.Now.ToString();
-                    message = cipher.EncryptMessage(message);
+
+                    messageDto = cipher.EncryptMessage(messageDto);
                 }
 
                 try
                 {
-                    await hubConnection.SendAsync("SendMessage", message);
+                    await hubConnection.SendAsync("SendMessage", messageDto);
                     MessageEntry.Text = string.Empty;
                     MessageEditor.Text = string.Empty;
                 }
@@ -421,17 +424,16 @@ namespace CohoistChat.Maui
                 AddMessage(message);
             });
 
-            hubConnection.On<Message>("ReceiveMessage", (message) =>
+            hubConnection.On<MessageDto>("ReceiveMessage", (messageDto) =>
             {
-                message = cipher.DecryptMessage(message);
-                message.TimeReceived = DateTime.Now.ToString();
+                var message = (Message)cipher.DecryptMessage(messageDto);
                 bool isMe = message.SenderEmail == me.Email;
                 if (isMe) message.Type = MessageTypeEnum.Me;
                 else message.Type = MessageTypeEnum.NotMe;
                 AddMessage(message);
             });
 
-            hubConnection.On<Message>("SendSuccess", (message) =>
+            hubConnection.On<MessageDto>("SendSuccess", (messageDto) =>
             {
                 
             });

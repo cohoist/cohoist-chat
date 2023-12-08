@@ -34,13 +34,15 @@ namespace CohoistChat.Shared
             }            
         }
 
-        public Message DecryptMessage(Message message)
+        public MessageDto DecryptMessage(MessageDto messageDto)
         {
-            message.Payload = DecryptString(message.Payload, message.IV);
-            message.SenderEmail = DecryptString(message.SenderEmail, message.IV);
-            message.SenderDisplayName = DecryptString(message.SenderDisplayName, message.IV);
-            message.TimeSent = DecryptString(message.TimeSent, message.IV);            
-            return message;
+            return new()
+            {
+                Payload = DecryptString(messageDto.Payload, messageDto.IV),
+                SenderEmail = DecryptString(messageDto.SenderEmail, messageDto.IV),
+                SenderDisplayName = DecryptString(messageDto.SenderDisplayName, messageDto.IV),
+                TimeSent = DecryptString(messageDto.TimeSent, messageDto.IV)
+            };
         }
 
         public string EncryptString(string text, string iv)
@@ -69,15 +71,17 @@ namespace CohoistChat.Shared
             }
         }
 
-        public Message EncryptMessage(Message message)
+        public MessageDto EncryptMessage(MessageDto messageDto)
         {
-            message.IV = GenerateIV();
-            message.Payload = EncryptString(message.Payload, message.IV);
-            message.SenderEmail = EncryptString(message.SenderEmail, message.IV);
-            message.SenderDisplayName = EncryptString(message.SenderDisplayName, message.IV);
-            message.TimeSent = EncryptString(message.TimeSent, message.IV);
-
-            return message;
+            var IV = GenerateIV();
+            return new()
+            {
+                IV = IV,
+                Payload = EncryptString(messageDto.Payload, IV),
+                SenderEmail = EncryptString(messageDto.SenderEmail, IV),
+                SenderDisplayName = EncryptString(messageDto.SenderDisplayName, IV),
+                TimeSent = EncryptString(messageDto.TimeSent, IV)
+            };
         }
 
         public static string GenerateIV()
