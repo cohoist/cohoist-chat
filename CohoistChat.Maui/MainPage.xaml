@@ -7,9 +7,11 @@
              xmlns:sf="clr-namespace:Syncfusion.Maui.ListView;assembly=Syncfusion.Maui.ListView"
 			 xmlns:syncfusion="clr-namespace:Syncfusion.Maui.Popup;assembly=Syncfusion.Maui.Popup"
              x:Class="CohoistChat.Maui.MainPage">
+    <!--
     <ContentPage.Resources>
         <local:StringToDateTimeConverter x:Key="stringToDateTime" />
     </ContentPage.Resources>
+    -->
 	<ContentPage.ToolbarItems>
 		<ToolbarItem Text="🔒" Clicked="OnPrivateClicked" AutomationId="Private" />
 		<ToolbarItem Text="Clear" Clicked="OnClearClicked" AutomationId="Clear" />
@@ -79,12 +81,12 @@
 								</DataTrigger>
 							</VerticalStackLayout.Triggers>
 							<Label Text="{Binding SenderDisplayName, StringFormat='{0}:'}" Margin="8,0" HorizontalOptions="End" FontAttributes="Bold"/>
-							<Label BindingContext="{Binding TimeReceived, Converter={StaticResource stringToDateTime}, Mode=OneWay}" Text="{Binding StringFormat='{0:g}'}" Margin="8,0" HorizontalOptions="End" FontSize="12"/>
+                            <Label BindingContext="{Binding TimeReceived, Mode=OneWay}" Text="{Binding StringFormat='{0:g}'}" Margin="8,0" HorizontalOptions="End" FontSize="12"/>
 						</VerticalStackLayout>
 						<Label Grid.Column="1" Text="{Binding Payload}" Margin="8,0" VerticalTextAlignment="Center" LineBreakMode="WordWrap">
 							<Label.Triggers>
 								<DataTrigger TargetType="Label" Binding="{Binding Type}" Value="{x:Static shared:MessageTypeEnum.NotMe}">
-									<Setter Property="ToolTipProperties.Text" Value="{Binding TimeSent, StringFormat='Sent: {0:G}', Converter={StaticResource stringToDateTime}, Mode=OneWay}" />
+									<Setter Property="ToolTipProperties.Text" Value="{Binding TimeSent, StringFormat='Sent: {0:G}', Mode=OneWay}" />
 								</DataTrigger>
 							</Label.Triggers>
 							<FlyoutBase.ContextFlyout>

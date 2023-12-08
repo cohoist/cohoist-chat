@@ -2,6 +2,7 @@ using System.Globalization;
 
 namespace CohoistChat.Maui
 {
+    //This converter is no longer used, because DateTime is only stored as string in transit, then converted to datetime on each end
     public class StringToDateTimeConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)

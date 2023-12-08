@@ -116,7 +116,7 @@ namespace CohoistChat.Maui
                     Payload = (checkBox.IsChecked ? MessageEditor.Text : MessageEntry.Text),
                     SenderEmail = me.Email,
                     SenderDisplayName = me.DisplayName,
-                    TimeSent = DateTime.Now.ToString()
+                    TimeSent = DateTime.UtcNow.ToString()
                 };
                 if (!_commands.Contains(messageDto.Payload.ToLower())) //do not encrypt command messages
                 {
@@ -405,7 +405,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
-                    TimeReceived = DateTime.Now.ToString(),
+                    TimeReceived = DateTime.Now,
                     Type = MessageTypeEnum.Connected,
                     Payload = $"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}] connected."
                 };
@@ -417,7 +417,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
-                    TimeReceived = DateTime.Now.ToString(),
+                    TimeReceived = DateTime.Now,
                     Type = MessageTypeEnum.Disconnected,
                     Payload = $"{user.Email} ({user.DisplayName}) [{user.ActiveConnections}] disconnected."
                 };
@@ -444,7 +444,7 @@ namespace CohoistChat.Maui
                 var message = new Message()
                 {
                     SenderDisplayName = "Info",
-                    TimeReceived = DateTime.Now.ToString(),
+                    TimeReceived = DateTime.Now,
                     Type = MessageTypeEnum.Info,
                     Payload = $"{users.Count} {onlineText}"
                 };

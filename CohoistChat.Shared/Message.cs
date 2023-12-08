@@ -23,8 +23,8 @@ namespace CohoistChat.Shared
                 SenderEmail = dto.SenderEmail,
                 SenderDisplayName = dto.SenderDisplayName,
                 IV = dto.IV,
-                TimeSent = dto.TimeSent,
-                TimeReceived = DateTime.Now.ToString()
+                TimeSent = DateTime.Parse(dto.TimeSent).ToLocalTime(),
+                TimeReceived = DateTime.UtcNow.ToLocalTime()
             };
         }
     }
@@ -35,7 +35,8 @@ namespace CohoistChat.Shared
         public string SenderDisplayName { get; set; }
         public string IV { get; set; }
         public MessageTypeEnum Type { get; set; }
-        public string TimeSent { get; set; }
-        public string TimeReceived { get; set; }
+        public DateTime TimeSent { get; set; }
+        public DateTime TimeReceived { get; set; }
+        public bool ContainsUrl { get; set; }
     }
 }
