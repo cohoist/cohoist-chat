@@ -40,7 +40,12 @@ namespace CohoistChat.Clientconsole
                 while (true)
                 {
                     Console.Write("> ");
-                    Message message = new() { Payload = Console.ReadLine() };
+                    MessageDto message = new() { 
+                        Payload = Console.ReadLine(),
+                        SenderEmail = me.Email,
+                        SenderDisplayName = me.DisplayName,
+                        TimeSent = DateTime.UtcNow.ToString()
+                    };
 
                     if (message.Payload.ToLower() == "exit")
                     {
@@ -71,8 +76,7 @@ namespace CohoistChat.Clientconsole
                         {
                             if (message.Payload.ToLower() != "!users") //do not encrypt command messages
                             {
-                                message.SenderEmail = me.Email;
-                                message.SenderDisplayName = me.DisplayName;
+                                
                                 message = cipher.EncryptMessage(message);
                             }
 
@@ -213,21 +217,22 @@ namespace CohoistChat.Clientconsole
                 Console.Write("> ");
             });
 
-            hubConnection.On<Message>("ReceiveMessage", (message) =>
+            hubConnection.On<MessageDto>("ReceiveMessage", (messageDto) =>
             {
-                message = cipher.DecryptMessage(message);
+                var message = (Message)cipher.DecryptMessage(messageDto);
                 bool isMe = message.SenderEmail == me.Email;
                 var receivedMsg = $"{DateTime.Now.ToString("g")} | {message.SenderDisplayName}: {message.Payload}";                
                 Console.SetCursorPosition(0, Console.CursorTop);
                 Console.BackgroundColor = isMe ? ConsoleColor.DarkGreen : ConsoleColor.DarkBlue;
                 Console.Write(receivedMsg);
                 Console.ResetColor();
-                Console.WriteLine(message.SenderEmail == me.Email ? null : "\a");
+                Console.WriteLine(isMe ? null : "\a");
                 Console.Write("> ");
             });
 
-            hubConnection.On<Message>("SendSuccess", (message) =>
+            hubConnection.On<MessageDto>("SendSuccess", (messageDto) =>
             {
+                var message = (Message)cipher.DecryptMessage(messageDto);
                 Console.SetCursorPosition(0, Console.CursorTop - 1 - (int)((message.Payload.Length + 2) / Console.BufferWidth)); //calculate number of rows this message spans
             });
 
