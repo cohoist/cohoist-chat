@@ -4,9 +4,13 @@
 
 # Cohoist Chat
 
-Cohoist Chat is an end-to-end encrypted chat application built using .NET 8 and SignalR. This project contains two independent applications: a console application and a MAUI application. The console application is a simple chat application that runs in the terminal. The MAUI application is a modern cross-platform chat application that runs on Android, iOS, macOS, and Windows. The project also includes a server application to facilitate communication between the client applications using a SignalR hub.
+Cohoist Chat is an end-to-end encrypted chat application built using **.NET 8** and **SignalR**. This project contains two independent applications: 
+- A console application
+- A MAUI application
 
-This open-source project demonstrates the capabilities of .NET 8, MAUI, SignalR and SyncFusion, and provides reference implementations for developers who want to build their own end-to-end encrypted chat applications.
+The console application is a simple chat application that runs in the terminal. The MAUI application is a modern cross-platform chat application that runs on Android, iOS, macOS, and Windows. The project also includes a server application to facilitate communication between the client applications using a SignalR hub.
+
+This open-source project demonstrates the capabilities of **.NET 8**, **MAUI**, **SignalR** and **SyncFusion**, and provides reference implementations for developers who want to build their own end-to-end encrypted chat applications.
 
 ## Features
 
